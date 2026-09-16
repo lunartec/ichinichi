@@ -1,0 +1,923 @@
+<title>Ichinichi</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#F2F4F3; --paper:#FFFFFF; --ink:#1B2734; --ink-2:#4B5966; --ink-3:#7C8894;
+  --line:#D9DEDC; --line-2:#E9ECEA;
+  --accent:#5A4FA0; --accent-ink:#FFFFFF; --accent-soft:#ECEAF7;
+  --gold:#B8860B; --gold-soft:#FBF3DC; --gold-ink:#5C4300;
+  --ok:#2E7D5B; --ok-soft:#E3F2EA; --warn:#A5541B; --warn-soft:#FBEBDD;
+  --shadow:0 1px 2px rgba(27,39,52,.06),0 8px 24px -12px rgba(27,39,52,.18);
+  --jp:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+  --min:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --lat:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181E; --paper:#1E232B; --ink:#E8E6E0; --ink-2:#B4B9C0; --ink-3:#7F8790;
+    --line:#333A44; --line-2:#293039;
+    --accent:#A69CEA; --accent-ink:#15181E; --accent-soft:#2A2740;
+    --gold:#E4B94A; --gold-soft:#3A3120; --gold-ink:#F3DC9A;
+    --ok:#6FCF9A; --ok-soft:#1F3A2E; --warn:#F0A05A; --warn-soft:#3E2B1B;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181E; --paper:#1E232B; --ink:#E8E6E0; --ink-2:#B4B9C0; --ink-3:#7F8790;
+  --line:#333A44; --line-2:#293039;
+  --accent:#A69CEA; --accent-ink:#15181E; --accent-soft:#2A2740;
+  --gold:#E4B94A; --gold-soft:#3A3120; --gold-ink:#F3DC9A;
+  --ok:#6FCF9A; --ok-soft:#1F3A2E; --warn:#F0A05A; --warn-soft:#3E2B1B;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--lat);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+button:focus-visible,textarea:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:640px;margin:0 auto;padding-inline:16px;padding-block:8px 48px;display:flex;flex-direction:column;gap:14px}
+.lang-jp{font-family:var(--jp)}
+.eyebrow{font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
+
+/* header */
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-block:10px 4px}
+.brand{display:flex;flex-direction:column;gap:2px}
+.brand .kanji{font-family:var(--min);font-size:34px;line-height:1;font-weight:700;letter-spacing:.04em}
+.brand .kanji small{font-family:var(--lat);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-left:8px;vertical-align:middle}
+.meta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.meta .date{font-size:13px;color:var(--ink-2);font-variant-numeric:tabular-nums;line-height:1.3}
+.meta .date small{display:block;font-size:11.5px;color:var(--ink-3)}
+.streak{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--gold-ink);background:var(--gold-soft);padding:3px 9px;border-radius:999px}
+.streak b{font-variant-numeric:tabular-nums}
+
+/* tag row */
+.tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tag{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-2);background:var(--paper)}
+.tag.level{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.tag.extra{background:var(--warn-soft);border-color:transparent;color:var(--warn)}
+
+/* main dialogue card */
+.card{background:var(--paper);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--line-2)}
+.dlg{padding:18px 18px 14px}
+.dlg .scene{font-size:13.5px;color:var(--ink-2);margin:0 0 14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+.line{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px 6px;border-radius:10px;transition:background .2s}
+.line.playing{background:var(--accent-soft)}
+.line .who{display:flex;align-items:center;justify-content:center;height:28px;min-width:28px;padding:0 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-family:var(--jp);font-size:13px;font-weight:700;margin-top:2px}
+.line.b .who{background:var(--gold-soft);color:var(--gold-ink)}
+.line .ja{font-family:var(--jp);font-size:20px;line-height:2;font-weight:500;margin:0;text-wrap:balance}
+.line .ja mark{background:none;color:inherit;text-decoration:underline;text-decoration-color:var(--gold);text-decoration-thickness:2.5px;text-underline-offset:5px;border-radius:2px}
+.line .ja mark.on{background:var(--gold-soft)}
+.line .en{font-size:14.5px;color:var(--ink-2);margin:2px 0 0;font-style:italic;transition:opacity .25s}
+.hide-furi rt{visibility:hidden}
+rt{font-size:.5em;color:var(--ink-3);font-weight:400;letter-spacing:0}
+.hide-en .en{display:none}
+.blur .line .en{filter:blur(6px);user-select:none;cursor:pointer}
+
+/* controls bar */
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line-2)}
+.btn{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;padding:8px 13px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);line-height:1;white-space:nowrap}
+.btn:hover{border-color:var(--ink-3)}
+.btn[aria-pressed="true"]{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:transparent}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn svg{width:15px;height:15px;flex:none}
+.spacer{flex:1}
+.rate{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--ink-3);font-weight:600}
+.rate button{padding:6px 8px;border-radius:8px;color:var(--ink-2)}
+.rate button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent)}
+.notice{font-size:12.5px;color:var(--ink-3);padding:4px 14px 10px;margin:0}
+
+/* sections */
+.sec{background:var(--paper);border-radius:14px;border:1px solid var(--line-2);overflow:hidden}
+.sec > summary{list-style:none;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;user-select:none}
+.sec > summary::-webkit-details-marker{display:none}
+.sec > summary .k{font-family:var(--min);font-size:20px;font-weight:700;letter-spacing:.06em;line-height:1}
+.sec > summary .t{font-size:13px;color:var(--ink-2);font-weight:500}
+.sec > summary .chev{margin-left:auto;width:18px;height:18px;color:var(--ink-3);transition:transform .2s}
+.sec[open] > summary .chev{transform:rotate(180deg)}
+.sec .body{padding:0 16px 16px;display:flex;flex-direction:column;gap:12px}
+.jp-note{font-family:var(--jp);font-size:15.5px;line-height:1.9;margin:0}
+.en-note{font-size:14px;color:var(--ink-2);margin:0}
+
+/* vocab */
+.vocab{display:flex;flex-direction:column;gap:10px}
+.word{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--line-2)}
+.word .w{font-family:var(--jp);font-size:19px;font-weight:700;margin:0;line-height:1.7}
+.word .w rt{font-size:.5em}
+.word .pos{font-size:11.5px;color:var(--ink-3);letter-spacing:.08em;text-transform:uppercase;font-weight:600;align-self:center}
+.word .def{grid-column:1/-1;font-family:var(--jp);font-size:14.5px;line-height:1.85;margin:0;color:var(--ink)}
+.word .def::before{content:"やさしい日本語で：";color:var(--gold-ink);font-weight:700;font-size:12px;letter-spacing:.04em}
+.word .en{grid-column:1/-1;font-size:13.5px;color:var(--ink-2);margin:0}
+.word .say{grid-column:1/-1;justify-self:start;font-size:12.5px;font-weight:600;color:var(--accent);display:inline-flex;gap:5px;align-items:center;padding:2px 0}
+.word .say svg{width:13px;height:13px}
+
+/* grammar */
+.pattern{font-family:var(--jp);font-size:18px;font-weight:700;background:var(--accent-soft);color:var(--accent);padding:10px 14px;border-radius:10px;margin:0;line-height:1.6}
+.ex{border-left:3px solid var(--gold);padding:4px 12px;margin:0;display:flex;flex-direction:column;gap:2px}
+.ex .ja{font-family:var(--jp);font-size:16.5px;line-height:1.9;margin:0}
+.ex .en{font-size:13.5px;color:var(--ink-2);margin:0;font-style:italic}
+.src{font-size:12px;color:var(--ink-3);margin:0}
+
+/* challenge */
+.task{font-family:var(--jp);font-size:16.5px;line-height:1.9;margin:0;font-weight:500}
+.task-en{font-size:14px;color:var(--ink-2);margin:0}
+textarea{width:100%;min-height:96px;resize:vertical;font-family:var(--jp);font-size:17px;line-height:1.8;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.hint{font-size:13px;color:var(--ink-2);margin:0;padding:10px 12px;background:var(--gold-soft);border-radius:10px;color:var(--gold-ink)}
+.hint .lang-jp{font-size:14px}
+.feedback{font-family:var(--jp);font-size:15px;line-height:1.9;padding:12px 14px;border-radius:10px;background:var(--ok-soft);border:1px solid transparent;white-space:pre-wrap;margin:0}
+.feedback.err{background:var(--warn-soft);color:var(--warn)}
+.feedback:empty{display:none}
+.model{font-family:var(--jp);font-size:16px;line-height:1.9;margin:0;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px dashed var(--line)}
+.model .lbl{display:block;font-family:var(--lat);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);font-weight:600;margin-bottom:4px}
+
+/* footer */
+.foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;padding-top:6px}
+.foot .small{font-size:12.5px;color:var(--ink-3);margin:0}
+.foot .small b{color:var(--ink-2);font-variant-numeric:tabular-nums}
+.progress{height:4px;border-radius:2px;background:var(--line-2);overflow:hidden;width:100%}
+.progress i{display:block;height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+
+@media (max-width:420px){
+  .brand .kanji{font-size:30px}
+  .line .ja{font-size:19px}
+  .bar{padding:10px}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+<div class="wrap" id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="kanji">一日<small>Ichinichi</small></div>
+      <div class="eyebrow">Today's conversation</div>
+    </div>
+    <div class="meta">
+      <div class="date" id="today"></div>
+      <span class="streak" id="streak" title="Days in a row you've opened today's piece">🔥 <b id="streakN">1</b> day</span>
+    </div>
+  </header>
+
+  <div class="tags" id="tags"></div>
+
+  <section class="card" aria-label="Dialogue">
+    <div class="dlg" id="dlg"></div>
+    <div class="bar">
+      <button class="btn primary" id="play" aria-label="Play the whole dialogue">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg><span id="playLbl">Listen</span>
+      </button>
+      <div class="rate" aria-label="Speech speed">
+        <button id="rSlow" aria-pressed="false">ゆっくり</button>
+        <button id="rNorm" aria-pressed="true">ふつう</button>
+      </div>
+      <span class="spacer"></span>
+      <button class="btn" id="tFuri" aria-pressed="true">ふりがな</button>
+      <button class="btn" id="tEn" aria-pressed="false">English</button>
+    </div>
+    <p class="notice" id="ttsNote" hidden></p>
+  </section>
+
+  <details class="sec" open>
+    <summary><span class="k">言葉</span><span class="t">Key words, explained in simple Japanese</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="body"><div class="vocab" id="vocab"></div></div>
+  </details>
+
+  <details class="sec">
+    <summary><span class="k">文法</span><span class="t">Today's grammar insight</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="body" id="grammar"></div>
+  </details>
+
+  <details class="sec" open>
+    <summary><span class="k">挑戦</span><span class="t">Your turn</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="body">
+      <p class="task" id="taskJa"></p>
+      <p class="task-en" id="taskEn"></p>
+      <label for="answer" class="eyebrow">Write or dictate your reply</label>
+      <textarea id="answer" placeholder="ここに日本語で書いてください…" lang="ja"></textarea>
+      <div class="bar" style="border:0;padding:0">
+        <button class="btn" id="sayMine" aria-label="Hear my answer read aloud">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>Hear it
+        </button>
+        <button class="btn" id="showHint" aria-pressed="false">Hint</button>
+        <button class="btn" id="showModel" aria-pressed="false">Model answer</button>
+        <button class="btn primary" id="feedback" hidden>Ask Claude for feedback</button>
+      </div>
+      <p class="hint" id="hint" hidden></p>
+      <p class="model" id="model" hidden></p>
+      <p class="feedback" id="fb"></p>
+    </div>
+  </details>
+
+  <footer class="foot">
+    <div class="progress" aria-hidden="true"><i id="progBar" style="width:0"></i></div>
+    <p class="small"><b id="seenN">0</b> of <b id="totalN">0</b> pieces met · new one at midnight</p>
+    <span class="spacer"></span>
+    <button class="btn" id="another">Another one</button>
+    <button class="btn" id="gen" hidden>Ask Claude for a fresh one</button>
+    <button class="btn" id="backToday" hidden>Back to today's</button>
+  </footer>
+</div>
+<script>
+const BANK = [
+{id:"01",lv:"N4",theme:"駅で",spk:["ゆい","たく"],scene:"Two friends at the station; one just missed the train.",
+lines:[
+["A","あ、電車[でんしゃ]、«行[い]っちゃった»…。","Ah, the train's gone (and I missed it)…"],
+["B","大丈夫[だいじょうぶ]。次[つぎ]は十分後[じゅっぷんご]だよ。","It's fine. The next one's in ten minutes."],
+["A","でも約束[やくそく]に«遅[おく]れそう»。先[さき]に連絡[れんらく]しておくね。","But I'm going to be late for my appointment. I'll message ahead."],
+["B","うん、そのほうがいいと思[おも]う。","Yeah, I think that's better."]],
+words:[
+["行っちゃった","verb (casual)","「行ってしまった」の短[みじか]い言[い]い方[かた]。電車[でんしゃ]が出[で]て、もう乗[の]れない。残念[ざんねん]な気持[きも]ちがある。","'went (and it's too late)' — casual contraction of 行ってしまった, carrying regret"],
+["遅[おく]れそう","verb + そう","「遅[おく]れる」＋「そう」。まだ遅[おく]れていないけど、たぶん遅[おく]れる、と思[おも]うとき。","'looks like I'll be late' — そう attached to a verb stem means 'seems about to'"],
+["連絡[れんらく]する","verb","電話[でんわ]やメッセージで、人[ひと]に何[なに]かを伝[つた]えること。","to contact / get in touch"]],
+gram:{p:"〜てしまう ／ 〜ちゃう",ref:"Tae Kim — Special expressions: 'To do something by accident or unintentionally' (〜てしまう)",
+ja:"「〜てしまう」は、①終[お]わったこと、②残念[ざんねん]なことに使[つか]います。話[はな]すときは「〜ちゃう」「〜じゃう」になります。「行[い]ってしまった」→「行[い]っちゃった」、「読[よ]んでしまった」→「読[よ]んじゃった」。",
+en:"〜てしまう marks an action as finished, or as regrettable. In speech it contracts to 〜ちゃう (or 〜じゃう after a voiced て-form like 読んで).",
+ex:[["財布[さいふ]を家[いえ]に忘[わす]れちゃった。","I left my wallet at home (oops)."],["ケーキ、全部[ぜんぶ]食[た]べちゃった？","Did you eat all the cake?!"]]},
+task:{ja:"友達[ともだち]に、今日[きょう]「〜ちゃった」ことを一[ひと]つ話[はな]してください。",en:"Tell a friend one thing you 'accidentally did' today, using 〜ちゃった.",hint:"Pattern: 〜ちゃった。＋ one extra sentence (why / what now?). E.g. 寝坊[ねぼう]しちゃった → 「だから朝[あさ]ごはんを食[た]べる時間[じかん]がなかった。」",model:"今朝[けさ]、コーヒーをシャツにこぼしちゃった。だから会社[かいしゃ]に着[つ]く前[まえ]に、コンビニで新[あたら]しいシャツを買[か]ったよ。"}},
+
+{id:"02",lv:"N4",theme:"会社で",spk:["田中","リサ"],scene:"A coworker asks a favour before a meeting.",
+lines:[
+["A","リサさん、ちょっと«手伝[てつだ]ってもらってもいい»？","Lisa, could I get you to help me for a sec?"],
+["B","いいですよ。何[なに]ですか？","Sure. What is it?"],
+["A","この資料[しりょう]を«コピーしておいて»ほしいんだ。会議[かいぎ]が三時[さんじ]からだから。","I'd like you to copy these documents in advance. The meeting starts at three."],
+["B","分[わ]かりました。何枚[なんまい]ずつですか？","Got it. How many of each?"]],
+words:[
+["手伝[てつだ]う","verb","ほかの人[ひと]の仕事[しごと]を、一緒[いっしょ]にすること。","to help (with a task)"],
+["資料[しりょう]","noun","会議[かいぎ]や勉強[べんきょう]で使[つか]う、紙[かみ]やデータのこと。","materials, documents, handouts"],
+["〜ずつ","particle","同[おな]じ数[かず]を、一[ひと]つずつ分[わ]けるときに使[つか]います。「二枚[にまい]ずつ」＝それぞれ二枚[にまい]。","'each / at a time' — e.g. 二枚ずつ = two copies of each"]],
+gram:{p:"〜ておく（〜とく）",ref:"Tae Kim — Special expressions: 'To do something in preparation for the future' (〜ておく)",
+ja:"「〜ておく」は、後[あと]のために、今[いま]何[なに]かをすることです。準備[じゅんび]の気持[きも]ちがあります。話[はな]すときは「〜とく」になります。「買[か]っておく」→「買[か]っとく」。",
+en:"〜ておく = do something now in preparation for later. Casual speech contracts it to 〜とく.",
+ex:[["飲[の]み物[もの]を冷[ひ]やしておきます。","I'll chill the drinks (ready for later)."],["明日[あした]のために早[はや]く寝[ね]とくね。","I'll get to bed early for tomorrow."]]},
+task:{ja:"明日[あした]のために、今日[きょう]「〜ておく」ことを二[ふた]つ言[い]ってください。",en:"Say two things you'll do today 'in preparation' for tomorrow, using 〜ておく.",hint:"〜ておく／〜とく ＋ reason with 「〜から」. E.g. 「お弁当[べんとう]を作[つく]っておく。明日[あした]は忙[いそが]しいから。」",model:"明日[あした]は朝早[あさはや]く出[で]かけるから、今夜[こんや]カバンの準備[じゅんび]をしておく。あと、電車[でんしゃ]の時間[じかん]も調[しら]べとくよ。"}},
+
+{id:"03",lv:"N4",theme:"レストランで",spk:["店員","客"],scene:"Ordering at a small restaurant; the customer has an allergy.",
+lines:[
+["A","ご注文[ちゅうもん]はお決[き]まりですか？","Are you ready to order?"],
+["B","はい。この定食[ていしょく]、卵[たまご]«抜[ぬ]きで»お願[ねが]いできますか？卵[たまご]アレルギーなんです。","Yes. Could I have this set meal without the egg? I'm allergic to eggs."],
+["A","かしこまりました。ソースにも少[すこ]し入[はい]っておりますが、«よろしいでしょうか»。","Certainly. There's a little in the sauce as well — would that be all right?"],
+["B","あ、じゃあソースも«なしで»。","Oh, then no sauce either, please."]],
+words:[
+["〜抜[ぬ]きで","expression","「〜を入[い]れないで」という意味[いみ]。レストランでよく使[つか]います。","'without ~' (a dish minus one ingredient)"],
+["定食[ていしょく]","noun","ごはん、みそ汁[しる]、おかずが一緒[いっしょ]になった食事[しょくじ]のセット。","set meal"],
+["かしこまりました","expression","店[みせ]の人[ひと]が「分[わ]かりました」を、とてもていねいに言[い]うとき。","'Certainly' — very polite 'understood', used by staff"]],
+gram:{p:"〜んです ／ 〜なんです",ref:"Tae Kim — 'Explaining with 〜んだ / 〜のだ'",
+ja:"「〜んです」は、理由[りゆう]を説明[せつめい]するときに使[つか]います。名詞[めいし]・な形容詞[けいようし]のあとは「なんです」。「アレルギーなんです」＝アレルギーがあるから（卵[たまご]はいらない）、という説明[せつめい]です。",
+en:"〜んです frames a sentence as an explanation ('the thing is…'). After nouns and な-adjectives it becomes 〜なんです.",
+ex:[["すみません、今日[きょう]は車[くるま]なんです。","Sorry, (the reason I'm not drinking is) I'm driving today."],["ちょっと頭[あたま]が痛[いた]いんです。","The thing is, I have a bit of a headache."]]},
+task:{ja:"レストランで、何[なに]かを変[か]えてほしいと頼[たの]んでください。理由[りゆう]も「〜んです」で言[い]ってください。",en:"Ask a restaurant to change something about your order, and give the reason with 〜んです.",hint:"「〜抜[ぬ]きでお願[ねが]いします。〜んです。」 Reasons: 辛[から]いものが苦手[にがて]／ベジタリアン／小[ちい]さい子供[こども]がいる",model:"すみません、このラーメン、ねぎ抜[ぬ]きでお願[ねが]いできますか。ねぎがちょっと苦手[にがて]なんです。"}},
+
+{id:"04",lv:"N3",theme:"週末の予定",spk:["さくら","ジョン"],scene:"Making weekend plans, weather permitting.",
+lines:[
+["A","土曜日[どようび]、«晴[は]れたら»山[やま]に行[い]かない？","If it's sunny Saturday, want to go to the mountains?"],
+["B","いいね。でも雨[あめ]«だったら»どうする？","Nice. But what if it rains?"],
+["A","雨[あめ]なら映画[えいが]«でも»見[み]ようか。","If it rains, let's just see a movie or something."],
+["B","うん。じゃあ金曜[きんよう]の夜[よる]に天気[てんき]を見[み]て決[き]めよう。","OK. Let's check the weather Friday night and decide."]],
+words:[
+["晴[は]れる","verb","空[そら]に雲[くも]がなくて、太陽[たいよう]が出[で]ていること。","to be sunny / clear up"],
+["〜でも","particle","例[れい]を一[ひと]つ出[だ]して、「たとえば〜とか」と軽[かる]く言[い]うとき。「お茶[ちゃ]でも飲[の]む？」","'~ or something' — softens a suggestion by giving one example"],
+["決[き]める","verb","いくつかの中[なか]から、一[ひと]つを選[えら]ぶこと。","to decide"]],
+gram:{p:"〜たら ／ 〜なら",ref:"Tae Kim — 'Conditionals': the たら and なら forms",
+ja:"「〜たら」は、「Aが起[お]きたあとで、B」。時間[じかん]の順番[じゅんばん]があります。「〜なら」は、相手[あいて]が言[い]ったことを受[う]けて、「その場合[ばあい]は」と言[い]うときに使[つか]います。「雨[あめ]なら映画[えいが]」＝雨[あめ]の場合[ばあい]は映画[えいが]。",
+en:"たら = 'when/if A happens, then B' (A comes first in time). なら = 'if that's the case', picking up what the other person just said.",
+ex:[["駅[えき]に着[つ]いたら、電話[でんわ]して。","Call me when you get to the station."],["寿司[すし]なら、あの店[みせ]がおすすめだよ。","If it's sushi you want, I recommend that place."]]},
+task:{ja:"友達[ともだち]を週末[しゅうまつ]に誘[さそ]ってください。「〜たら」で条件[じょうけん]を、「〜なら」で別[べつ]の案[あん]を言[い]ってください。",en:"Invite a friend out this weekend. Use 〜たら for a condition and 〜なら for a plan B.",hint:"「〜たら、〜に行[い]かない？」→「〜なら、〜でも〜しようか。」",model:"日曜日[にちようび]、天気[てんき]がよかったら海[うみ]に行[い]かない？寒[さむ]いなら、カフェでゆっくりでもしようか。"}},
+
+{id:"05",lv:"N4",theme:"病院で",spk:["医者","患者"],scene:"A short visit to the doctor for a cold.",
+lines:[
+["A","今日[きょう]はどうしましたか？","What brings you in today?"],
+["B","昨日[きのう]から喉[のど]が痛[いた]くて、熱[ねつ]も«少[すこ]し»あります。","Since yesterday my throat's been sore, and I have a slight fever too."],
+["A","風邪[かぜ]ですね。薬[くすり]を出[だ]しますから、三日間[みっかかん]«飲[の]んでください»。それから、«無理[むり]をしないで»。","It's a cold. I'll prescribe medicine — take it for three days. And don't push yourself."],
+["B","はい。お風呂[ふろ]に入[はい]ってもいいですか？","OK. Is it all right to take a bath?"]],
+words:[
+["喉[のど]","noun","口[くち]の奥[おく]。食[た]べ物[もの]や声[こえ]が通[とお]るところ。","throat"],
+["薬[くすり]を飲[の]む","expression","日本語[にほんご]では、薬[くすり]は「食[た]べる」ではなく「飲[の]む」と言[い]います。","to take medicine (literally 'drink', even for pills)"],
+["無理[むり]をする","expression","体[からだ]や心[こころ]がつらいのに、がんばりすぎること。","to overdo it / push oneself too hard"]],
+gram:{p:"〜てください ／ 〜ないでください",ref:"Tae Kim — 'Making requests': 〜てください and negative requests",
+ja:"「〜てください」はお願[ねが]いです。「〜ないでください」は「しないで」というお願[ねが]いです。友達[ともだち]には「ください」を取[と]って、「飲[の]んで」「無理[むり]しないで」と言[い]います。",
+en:"〜てください makes a polite request; 〜ないでください asks someone not to do something. Drop ください with friends.",
+ex:[["ここに名前[なまえ]を書[か]いてください。","Please write your name here."],["写真[しゃしん]を撮[と]らないでください。","Please don't take photos."]]},
+task:{ja:"風邪[かぜ]の友達[ともだち]に、アドバイスを三[みっ]つしてください。「〜て」と「〜ないで」を両方[りょうほう]使[つか]ってください。",en:"Give a friend with a cold three pieces of advice, using both 〜て and 〜ないで.",hint:"ゆっくり休[やす]んで／水[みず]をたくさん飲[の]んで／お酒[さけ]を飲[の]まないで／夜[よる]、遅[おそ]くまで起[お]きていないで",model:"今日[きょう]は早[はや]く寝[ね]て、水[みず]をたくさん飲[の]んでね。それから、無理[むり]して会社[かいしゃ]に行[い]かないで。"}},
+
+{id:"06",lv:"N3",theme:"引っ越し",spk:["まい","ひろ"],scene:"Catching up after one of them moved to a new apartment.",
+lines:[
+["A","新[あたら]しい部屋[へや]、どう？","How's the new place?"],
+["B","«思[おも]ったより»広[ひろ]いよ。でも駅[えき]から遠[とお]くて、«歩[ある]けば»二十分[にじゅっぷん]かかる。","It's bigger than I expected. But it's far from the station — twenty minutes if you walk."],
+["A","自転車[じてんしゃ]を買[か]え«ば»いいじゃん。","You should just buy a bike."],
+["B","そうだね。«安[やす]ければ»買[か]おうかな。","True. If it's cheap, maybe I will."]],
+words:[
+["思[おも]ったより","expression","「思[おも]っていたことと違[ちが]って、もっと〜」。いい意味[いみ]でも悪[わる]い意味[いみ]でも使[つか]います。","'more than I expected'"],
+["〜じゃん","ending (casual)","「〜じゃない？」の短[みじか]い形[かたち]。「そうでしょう？」という気持[きも]ち。若[わか]い人[ひと]がよく使[つか]います。","'…right?' — casual tag, contraction of じゃない"],
+["〜かな","ending","「たぶん〜」「〜だろうか」。自分[じぶん]に話[はな]すように、やわらかく言[い]うとき。","'I wonder / maybe I'll…' — softens a decision"]],
+gram:{p:"〜ば（仮定形）",ref:"Tae Kim — 'Conditionals': the ば form",
+ja:"「〜ば」は「もし〜なら」です。動詞[どうし]：う→え＋ば（買[か]う→買[か]えば、歩[ある]く→歩[ある]けば）。い形容詞[けいようし]：い→ければ（安[やす]い→安[やす]ければ）。「〜ばいい」は「〜したらいいよ」というアドバイスです。",
+en:"ば is the general 'if'. Verbs: final う-sound → え-sound + ば. い-adjectives: 〜い → 〜ければ. 〜ばいい gives advice: 'you should just…'.",
+ex:[["この薬[くすり]を飲[の]めば、すぐ良[よ]くなるよ。","If you take this medicine you'll get better quickly."],["分[わ]からなければ、聞[き]けばいい。","If you don't understand, just ask."]]},
+task:{ja:"新[あたら]しい町[まち]に引[ひ]っ越[こ]した友達[ともだち]に、「〜ばいい」でアドバイスをしてください。",en:"A friend has moved to a new town. Give advice with 〜ばいい.",hint:"「〜ば、〜よ。」 Ideas: 近所[きんじょ]の人[ひと]にあいさつする／自転車[じてんしゃ]で町[まち]を回[まわ]る／地図[ちず]アプリを使[つか]う",model:"週末[しゅうまつ]に自転車[じてんしゃ]で町[まち]を一周[いっしゅう]すればいいよ。いいカフェが見[み]つかれば、すぐ好[す]きになると思[おも]う。"}},
+
+{id:"07",lv:"N3",theme:"頼みごと",spk:["けんじ","アナ"],scene:"Asking a neighbour to look after a plant during a trip.",
+lines:[
+["A","来週[らいしゅう]、実家[じっか]に帰[かえ]るんだけど、植物[しょくぶつ]に水[みず]を«やってもらえない»かな。","I'm going back to my parents' next week — could you maybe water my plant?"],
+["B","もちろん。何日[なんにち]くらい？","Of course. For how many days?"],
+["A","五日[いつか]。お礼[れい]に、お土産[みやげ]«買[か]ってくる»ね。","Five days. I'll bring you back a souvenir to say thanks."],
+["B","気[き]にしないで。でも、«楽[たの]しみにしてる»！","Don't worry about it. But I'm looking forward to it!"]],
+words:[
+["実家[じっか]","noun","自分[じぶん]が生[う]まれて育[そだ]った家[いえ]。両親[りょうしん]が住[す]んでいる家[いえ]。","one's parents' home / family home"],
+["お礼[れい]","noun","「ありがとう」の気持[きも]ちを、言葉[ことば]や物[もの]で表[あらわ]すこと。","thanks (as a gesture or gift)"],
+["楽[たの]しみにしている","expression","これから起[お]きることを、うれしい気持[きも]ちで待[ま]っていること。","to look forward to"]],
+gram:{p:"〜てもらえない？ ／ 〜てくれる？",ref:"Tae Kim — 'Giving and receiving': てくれる / てもらう",
+ja:"人[ひと]に何[なに]かを頼[たの]むとき：「〜てくれる？」（あなたが私[わたし]にする）と「〜てもらえる？」（私[わたし]があなたからしてもらう）。「〜てもらえない？」と否定[ひてい]で聞[き]くと、もっとやわらかいです。",
+en:"To ask a favour: 〜てくれる？ (will you do it for me?) or 〜てもらえる？ (can I get you to?). The negative 〜てもらえない？ is softer still.",
+ex:[["ちょっと写真[しゃしん]を撮[と]ってくれる？","Could you take a photo?"],["明日[あした]、駅[えき]まで送[おく]ってもらえない？","Could you maybe drive me to the station tomorrow?"]]},
+task:{ja:"隣[となり]の人[ひと]に、旅行[りょこう]の間[あいだ]に何[なに]かを頼[たの]んでください。お礼[れい]も言[い]ってください。",en:"Ask a neighbour to do something for you while you travel, and offer thanks.",hint:"「〜んだけど、〜てもらえないかな。」＋「お礼[れい]に〜」",model:"来月[らいげつ]、一週間[いっしゅうかん]出張[しゅっちょう]なんだけど、郵便[ゆうびん]を受[う]け取[と]ってもらえないかな。お礼[れい]に、帰[かえ]ったら晩[ばん]ごはんをごちそうするね。"}},
+
+{id:"08",lv:"N4",theme:"買い物",spk:["客","店員"],scene:"Trying on a jacket in a clothing shop.",
+lines:[
+["A","これ、«着[き]てみてもいい»ですか？","May I try this on?"],
+["B","どうぞ。試着室[しちゃくしつ]はあちらです。","Please. The fitting room is over there."],
+["A","うーん、ちょっと«小[ちい]さすぎる»かも。«一[ひと]つ大[おお]きいサイズ»、ありますか？","Hmm, maybe it's a bit too small. Do you have one size up?"],
+["B","はい、Lサイズをお持[も]ちしますね。","Yes, I'll bring you a large."]],
+words:[
+["〜てみる","verb form","「ためしに〜する」。結果[けっか]はまだ分[わ]からないけど、やってみること。","to try doing ~ (and see)"],
+["試着室[しちゃくしつ]","noun","店[みせ]で、服[ふく]を着[き]てみるための小[ちい]さい部屋[へや]。","fitting room"],
+["〜すぎる","verb form","「〜が多[おお]すぎる／強[つよ]すぎる」。ちょうどいい、より上[うえ]。悪[わる]い意味[いみ]が多[おお]い。","too ~ (excessively)"]],
+gram:{p:"〜てみる ／ 〜すぎる",ref:"Tae Kim — 'Trying something out' (〜てみる) and 'Too much of something' (〜すぎる)",
+ja:"「〜てみる」＝ためしにする。「着[き]てみる」「食[た]べてみる」。「〜すぎる」は、形容詞[けいようし]の「い」を取[と]って付[つ]けます：小[ちい]さい→小[ちい]さすぎる、高[たか]い→高[たか]すぎる。動詞[どうし]は、ます形[けい]から：食[た]べすぎる、飲[の]みすぎる。",
+en:"〜てみる = try and see. 〜すぎる attaches to an adjective stem (小さ + すぎる) or verb stem (飲み + すぎる) to mean 'too much'.",
+ex:[["このアプリ、使[つか]ってみて。便利[べんり]だよ。","Try this app — it's handy."],["昨日[きのう]は飲[の]みすぎた。","I drank too much yesterday."]]},
+task:{ja:"店[みせ]で何[なに]かをためして、問題[もんだい]を「〜すぎる」で言[い]って、別[べつ]のものを頼[たの]んでください。",en:"Try something in a shop, say what's wrong using 〜すぎる, and ask for an alternative.",hint:"「〜てみてもいいですか？」→「ちょっと〜すぎるかも。〜はありますか？」 (色[いろ]が明[あか]るすぎる／長[なが]すぎる／重[おも]すぎる)",model:"この靴[くつ]、履[は]いてみてもいいですか？…うーん、ちょっときつすぎるかも。24.5センチはありますか？"}},
+
+{id:"09",lv:"N3",theme:"うわさ",spk:["なお","ゆうた"],scene:"Two coworkers gossip about a colleague who might be leaving.",
+lines:[
+["A","ねえ、鈴木[すずき]さん、会社[かいしゃ]を«辞[や]めるらしい»よ。","Hey, apparently Suzuki's quitting."],
+["B","え、本当[ほんとう]？誰[だれ]から聞[き]いたの？","What, really? Who'd you hear that from?"],
+["A","部長[ぶちょう]が言[い]ってた。«忙[いそが]しそう»だったから、疲[つか]れたのかもね。","The manager said so. He seemed really busy, so maybe he burned out."],
+["B","そっか…。«寂[さび]しくなる»ね。","I see… It'll be lonely without him."]],
+words:[
+["辞[や]める","verb","仕事[しごと]や学校[がっこう]をやめて、行[い]かなくなること。「止[や]める」（ストップ）とは違[ちが]う漢字[かんじ]。","to quit (a job, school)"],
+["〜のかも","expression","「〜のかもしれない」の短[みじか]い形[かたち]。「たぶん〜だと思[おも]う」。","'maybe it's that…' — casual かもしれない"],
+["寂[さび]しい","い-adjective","一人[ひとり]で、だれもいなくて、悲[かな]しい気持[きも]ち。","lonely"]],
+gram:{p:"〜らしい ／ 〜そう（様態）",ref:"Tae Kim — 'Expressing similarity': 〜そう vs 〜らしい vs 〜みたい",
+ja:"「〜らしい」は、人[ひと]から聞[き]いた情報[じょうほう]です。「辞[や]めるらしい」＝そう聞[き]いた。「〜そう」は、自分[じぶん]の目[め]で見[み]て思[おも]ったこと。「忙[いそが]しそう」＝見[み]て、忙[いそが]しいと思[おも]った。",
+en:"らしい = 'I hear that…' (based on what others said). Adjective + そう = 'looks…' (based on what you saw).",
+ex:[["あの店[みせ]、来月[らいげつ]閉[し]まるらしい。","I hear that shop is closing next month."],["このケーキ、おいしそう！","This cake looks delicious!"]]},
+task:{ja:"聞[き]いたうわさを「〜らしい」で伝[つた]えて、見[み]て思[おも]ったことを「〜そう」で言[い]ってください。",en:"Pass on something you heard with 〜らしい, then add an observation with 〜そう.",hint:"「〜らしいよ。〜そうだったから、〜のかもね。」",model:"隣[となり]のクラスの先生[せんせい]、来年[らいねん]カナダに行[い]くらしいよ。この前[まえ]、英語[えいご]の勉強[べんきょう]で大変[たいへん]そうだったから、準備[じゅんび]してるのかもね。"}},
+
+{id:"10",lv:"N4",theme:"道をきく",spk:["旅行者","通行人"],scene:"Asking a passer-by the way to the post office.",
+lines:[
+["A","すみません、郵便局[ゆうびんきょく]は«どう行[い]けば»いいですか？","Excuse me, how do I get to the post office?"],
+["B","この道[みち]を«まっすぐ行[い]って»、二[ふた]つ目[め]の信号[しんごう]を右[みぎ]に曲[ま]がってください。","Go straight down this road and turn right at the second light."],
+["A","二[ふた]つ目[め]の信号[しんごう]を右[みぎ]ですね。","Right at the second light, got it."],
+["B","はい。銀行[ぎんこう]の«隣[となり]»ですよ。歩[ある]いて五分[ごふん]くらいです。","Yes. It's next to the bank. About five minutes on foot."]],
+words:[
+["信号[しんごう]","noun","道[みち]にある、赤[あか]・黄色[きいろ]・青[あお]のライト。","traffic light"],
+["曲[ま]がる","verb","まっすぐ行[い]かないで、右[みぎ]や左[ひだり]に行[い]くこと。","to turn (a corner)"],
+["隣[となり]","noun","すぐ横[よこ]。間[あいだ]に何[なに]もない、一番[いちばん]近[ちか]いところ。","next to / next door"]],
+gram:{p:"〜て、〜てください（順番）",ref:"Tae Kim — 'Sequence of actions with the て-form'",
+ja:"いくつかの動作[どうさ]を順番[じゅんばん]に言[い]うとき、最後[さいご]の動詞[どうし]だけ「〜てください」にします。前[まえ]の動詞[どうし]は「〜て」で止[と]めます。「まっすぐ行[い]って、右[みぎ]に曲[ま]がって、渡[わた]ってください。」",
+en:"Chain actions with the て-form; only the last verb takes ください. Repeat the key step back (〜ですね) to confirm.",
+ex:[["駅[えき]を出[で]て、左[ひだり]に行[い]ってください。","Leave the station and go left."],["ボタンを押[お]して、少[すこ]し待[ま]ってください。","Press the button and wait a moment."]]},
+task:{ja:"あなたの家[いえ]から一番[いちばん]近[ちか]いコンビニ（か駅[えき]）への行[い]き方[かた]を説明[せつめい]してください。",en:"Explain how to get from your home to the nearest convenience store or station.",hint:"まっすぐ行[い]く／右[みぎ]・左[ひだり]に曲[ま]がる／〜を渡[わた]る／〜の前[まえ]・隣[となり]・向[む]かい／〜分[ふん]くらい",model:"家[いえ]を出[で]て、左[ひだり]にまっすぐ行[い]ってください。一[ひと]つ目[め]の信号[しんごう]を渡[わた]って、右[みぎ]に曲[ま]がると、パン屋[や]の隣[となり]にコンビニがあります。歩[ある]いて三分[さんぷん]くらいです。"}},
+{id:"11",lv:"N3",theme:"遅刻の言い訳",spk:["先輩","後輩"],scene:"A junior colleague arrives late and explains.",
+lines:[
+["B","遅[おく]れてすみません！電車[でんしゃ]が«止[と]まって»しまって…。","Sorry I'm late! The train stopped…"],
+["A","大丈夫[だいじょうぶ]。連絡[れんらく]«くれた»から、心配[しんぱい]してなかったよ。","It's fine. You messaged me, so I wasn't worried."],
+["B","ありがとうございます。次[つぎ]からは、«もっと早[はや]く»家[いえ]を出[で]ます。","Thank you. From now on I'll leave home earlier."],
+["A","まあ、電車[でんしゃ]のせいだから、«仕方[しかた]ない»よ。","Well, it was the train's fault, so it can't be helped."]],
+words:[
+["止[と]まる","verb (intransitive)","動[うご]いていたものが、動[うご]かなくなること。「止[と]める」は人[ひと]が止[と]まらせること。","to stop (by itself) — vs 止める 'to stop something'"],
+["〜のせい","expression","悪[わる]いことの理由[りゆう]。「電車[でんしゃ]のせい」＝電車[でんしゃ]が悪[わる]い。いい理由[りゆう]は「〜のおかげ」。","'because of ~ (negative)' — vs おかげ for good outcomes"],
+["仕方[しかた]ない","expression","「どうすることもできない」「しょうがない」。あきらめる気持[きも]ち。","'it can't be helped'"]],
+gram:{p:"自動詞 ／ 他動詞",ref:"Tae Kim — 'Transitive and intransitive verbs'",
+ja:"日本語[にほんご]には、ペアの動詞[どうし]が多[おお]いです。自動詞[じどうし]（〜が）：止[と]まる、開[あ]く、落[お]ちる。他動詞[たどうし]（〜を）：止[と]める、開[あ]ける、落[お]とす。言[い]い訳[わけ]では、自動詞[じどうし]を使[つか]うと「自分[じぶん]のせいじゃない」という感[かん]じになります。",
+en:"Many verbs come in pairs: intransitive (電車が止まる — it stopped) vs transitive (電車を止める — someone stopped it). Using the intransitive in an excuse quietly removes blame.",
+ex:[["ドアが開[あ]いている。／ドアを開[あ]けた。","The door is open. / I opened the door."],["財布[さいふ]が落[お]ちたよ。／財布[さいふ]を落[お]とした。","Your wallet fell. / I dropped my wallet."]]},
+task:{ja:"遅[おく]れた理由[りゆう]を、自動詞[じどうし]を使[つか]って説明[せつめい]してください。そして、次[つぎ]はどうするか言[い]ってください。",en:"Explain why you were late using an intransitive verb, then say what you'll do next time.",hint:"「〜が止[と]まって／壊[こわ]れて／なくなって…」＋「次[つぎ]からは〜ます。」",model:"遅[おく]れてすみません。朝[あさ]、目覚[めざ]まし時計[どけい]が壊[こわ]れていて、鳴[な]らなかったんです。次[つぎ]からはスマホのアラームも使[つか]います。"}},
+
+{id:"12",lv:"N4",theme:"趣味の話",spk:["ミカ","トム"],scene:"Chatting about hobbies at a party.",
+lines:[
+["A","トムさんは、休[やす]みの日[ひ]に何[なに]を«するのが好[す]き»ですか？","Tom, what do you like doing on your days off?"],
+["B","料理[りょうり]ですね。最近[さいきん]、日本[にほん]の家庭[かてい]料理[りょうり]を«作[つく]れるように»なりました。","Cooking. Recently I've become able to make Japanese home cooking."],
+["A","すごい！何[なに]が«一番[いちばん]»得意[とくい]ですか？","Wow! What's your best dish?"],
+["B","肉[にく]じゃがです。でも、まだ味[あじ]が«うまく決[き]まらない»ときもあります。","Nikujaga. But sometimes the seasoning still doesn't come out right."]],
+words:[
+["家庭[かてい]料理[りょうり]","noun","レストランの料理[りょうり]ではなくて、家[いえ]で毎日[まいにち]作[つく]る料理[りょうり]。","home cooking"],
+["得意[とくい]","な-adjective","上手[じょうず]にできて、自信[じしん]があること。反対[はんたい]は「苦手[にがて]」。","good at (with confidence) — opposite 苦手"],
+["味[あじ]が決[き]まる","expression","料理[りょうり]の味[あじ]がちょうどよくなること。","the seasoning comes together / tastes right"]],
+gram:{p:"〜ようになる（できるようになる）",ref:"Tae Kim — 'Potential form' and 'Expressing a change of state with ようになる'",
+ja:"「〜ようになる」は、前[まえ]はできなかったことが、今[いま]はできる、という変化[へんか]です。可能形[かのうけい]と一緒[いっしょ]に使[つか]うことが多[おお]いです：作[つく]る→作[つく]れる→作[つく]れるようになった。",
+en:"〜ようになる marks a change over time: 'came to / became able to'. It pairs naturally with the potential form (作れる → 作れるようになった).",
+ex:[["漢字[かんじ]が少[すこ]し読[よ]めるようになりました。","I've become able to read a bit of kanji."],["朝[あさ]、早[はや]く起[お]きるようになった。","I've started getting up early."]]},
+task:{ja:"日本語[にほんご]で、最近[さいきん]「できるようになった」ことを一[ひと]つ話[はな]してください。まだ難[むずか]しいことも言[い]ってください。",en:"Describe one thing you've recently become able to do, and one thing that's still hard.",hint:"「最近[さいきん]、〜ようになりました。でも、〜はまだ〜。」",model:"最近[さいきん]、日本語[にほんご]のニュースが少[すこ]し分[わ]かるようになりました。でも、速[はや]く話[はな]す人[ひと]の日本語[にほんご]は、まだ聞[き]き取[と]れないときが多[おお]いです。"}},
+
+{id:"13",lv:"N3",theme:"忘れ物",spk:["駅員","客"],scene:"Reporting an umbrella left on a train.",
+lines:[
+["B","すみません、電車[でんしゃ]に傘[かさ]を«忘[わす]れたみたい»なんですが…。","Excuse me, I think I left my umbrella on the train…"],
+["A","どの電車[でんしゃ]ですか？","Which train?"],
+["B","十時[じゅうじ]«ごろ»の、新宿[しんじゅく]行[い]きです。青[あお]い、«折[お]りたたみ»の傘[かさ]です。","The one around ten, bound for Shinjuku. A blue folding umbrella."],
+["A","確認[かくにん]しますので、«少々[しょうしょう]お待[ま]ちください»。","I'll check — please wait a moment."]],
+words:[
+["〜みたい","expression","「〜のようだ」。見[み]たことや感[かん]じたことから、「たぶん〜」と思[おも]うとき。","'it seems / looks like' — casual, based on your own sense"],
+["〜ごろ","suffix","時間[じかん]のあとに付[つ]けて、「だいたいその時間[じかん]」。「十時[じゅうじ]ごろ」＝十時[じゅうじ]くらい。","'around (time)'"],
+["少々[しょうしょう]お待[ま]ちください","expression","「ちょっと待[ま]ってください」の、とてもていねいな言[い]い方[かた]。店[みせ]や駅[えき]でよく聞[き]きます。","'Please wait a moment' (formal)"]],
+gram:{p:"〜行き ／ 〜ので",ref:"Tae Kim — 'Expressing reasons with ので' (plus the 〜行き suffix for destinations)",
+ja:"「新宿[しんじゅく]行[い]き」は「新宿[しんじゅく]に行[い]く電車[でんしゃ]」。「〜ので」は「〜から」と同[おな]じ理由[りゆう]ですが、もっとていねいで、やわらかいです。名詞[めいし]・な形容詞[けいようし]は「〜なので」。",
+en:"〜行き marks a train's destination. 〜ので gives a reason like から but sounds more polite and objective; nouns and な-adjectives take なので.",
+ex:[["この電車[でんしゃ]は東京[とうきょう]行[い]きです。","This train is bound for Tokyo."],["雨[あめ]なので、今日[きょう]は家[いえ]にいます。","Since it's raining, I'm staying home today."]]},
+task:{ja:"忘[わす]れ物[もの]をしました。駅[えき]か店[みせ]の人[ひと]に、いつ、どこで、どんな物[もの]か説明[せつめい]してください。",en:"You've lost something. Tell station or shop staff when, where, and what it looks like.",hint:"「〜に〜を忘[わす]れたみたいなんですが…」＋時間[じかん]（〜ごろ）＋色[いろ]・大[おお]きさ・形[かたち]",model:"すみません、さっきこの店[みせ]に携帯[けいたい]を忘[わす]れたみたいなんですが…。三時[さんじ]ごろ、窓[まど]の近[ちか]くの席[せき]でした。黒[くろ]いケースの、大[おお]きめのスマホです。"}},
+
+{id:"14",lv:"N3",theme:"誘いを断る",spk:["あや","しん"],scene:"Politely turning down an invitation to drinks.",
+lines:[
+["A","今夜[こんや]、みんなで飲[の]みに«行[い]くんだけど»、来[こ]ない？","We're all going for drinks tonight — wanna come?"],
+["B","行[い]きたいんだけど…«明日[あした]朝早[あさはや]くて»。ごめん。","I'd love to, but… I've got an early morning tomorrow. Sorry."],
+["A","そっか、残念[ざんねん]。«また今度[こんど]»ね。","Ah, too bad. Next time then."],
+["B","うん、«ぜひ»誘[さそ]って！","Yeah, definitely invite me again!"]],
+words:[
+["〜んだけど","expression","話[はなし]の前置[まえお]き。「〜なんですが」の友達[ともだち]バージョン。あとに誘[さそ]いやお願[ねが]いが来[く]ることが多[おお]い。","'…, so…' — sets up an invitation or request"],
+["また今度[こんど]","expression","「今回[こんかい]はだめだけど、次[つぎ]のとき」。断[ことわ]るときの、やさしい言葉[ことば]。","'another time' — soft way to decline"],
+["ぜひ","adverb","「本当[ほんとう]に、ぜったいに」という強[つよ]い気持[きも]ち。誘[さそ]いを受[う]けるときによく使[つか]う。","'by all means / definitely'"]],
+gram:{p:"言いさし（文を途中で止める）",ref:"Tae Kim — 'Casual patterns and slang': trailing off with けど / て",
+ja:"日本語[にほんご]では、断[ことわ]るとき、文[ぶん]を最後[さいご]まで言[い]いません。「明日[あした]朝早[あさはや]くて…」＝だから行[い]けない。「行[い]きたいんだけど…」＝でも無理[むり]。相手[あいて]が意味[いみ]を分[わ]かってくれます。はっきり「行[い]けません」と言[い]うより、やさしいです。",
+en:"When declining, Japanese speakers often stop mid-sentence: 「〜て…」 or 「〜けど…」. The listener fills in the rest. It's softer than a flat 'I can't'.",
+ex:[["今日[きょう]はちょっと…。","Today's a bit… (no)."],["行[い]きたいのはやまやまなんだけど…。","I really, really want to go, but…"]]},
+task:{ja:"誘[さそ]いを、やさしく断[ことわ]ってください。理由[りゆう]は最後[さいご]まで言[い]わないで、「また今度[こんど]」も使[つか]ってください。",en:"Turn down an invitation gently. Trail off the reason and use また今度.",hint:"「〜たいんだけど、〜て…。ごめんね。また今度[こんど]、ぜひ。」",model:"行[い]きたいんだけど、今週[こんしゅう]はちょっと仕事[しごと]が忙[いそが]しくて…。ごめんね。また今度[こんど]、ぜひ誘[さそ]って！"}},
+
+{id:"15",lv:"N4",theme:"天気の話",spk:["近所の人","あなた"],scene:"Small talk with a neighbour on a hot morning.",
+lines:[
+["A","おはようございます。今日[きょう]も«暑[あつ]くなりそう»ですね。","Morning. Looks like it'll be hot again today."],
+["B","本当[ほんとう]に。昨日[きのう]は三十五度[さんじゅうごど]«まで»上[あ]がったそうですよ。","Really. I heard it went up to 35 degrees yesterday."],
+["A","えっ、それは«大変[たいへん]»。水分[すいぶん]を取[と]らないと。","Oh, that's rough. Have to keep drinking water."],
+["B","ですね。«気[き]をつけて»いってらっしゃい。","Right. Take care, have a good day."]],
+words:[
+["〜まで","particle","「〜のところに着[つ]く」。数字[すうじ]のあとでは、「そんなに高[たか]く／多[おお]く」という驚[おどろ]きがある。","'up to / as far as' — with numbers, implies 'that much!'"],
+["水分[すいぶん]を取[と]る","expression","水[みず]や飲[の]み物[もの]を飲[の]むこと。夏[なつ]によく聞[き]く言葉[ことば]。","to stay hydrated"],
+["いってらっしゃい","expression","出[で]かける人[ひと]に言[い]う言葉[ことば]。「気[き]をつけて行[い]ってきてね」。","'Have a good day / see you later' (to someone leaving)"]],
+gram:{p:"〜そうです（伝聞） vs 〜そう（様態）",ref:"Tae Kim — 'Expressing hearsay' (〜そうだ) vs 'appearance' (〜そう)",
+ja:"同[おな]じ「そう」ですが、形[かたち]が違[ちが]います。①「暑[あつ]くなりそう」＝ます形[けい]／形容詞[けいようし]の語幹[ごかん]＋そう ＝見[み]て思[おも]う。②「上[あ]がったそうです」＝普通形[ふつうけい]＋そうです＝人[ひと]から聞[き]いた。",
+en:"Two different そう: stem + そう = 'looks like' (your own guess); plain form + そうです = 'I heard that' (hearsay). Watch the verb form before it.",
+ex:[["雨[あめ]が降[ふ]りそう。","It looks like it's going to rain."],["明日[あした]は雨[あめ]が降[ふ]るそうです。","I hear it's going to rain tomorrow."]]},
+task:{ja:"今日[きょう]の天気[てんき]について、近所[きんじょ]の人[ひと]と話[はな]してください。「〜そう」を二種類[にしゅるい]使[つか]ってください。",en:"Make small talk about today's weather, using both kinds of そう.",hint:"「今日[きょう]は〜そうですね。」＋「天気[てんき]予報[よほう]では、〜そうですよ。」",model:"今日[きょう]は寒[さむ]くなりそうですね。天気[てんき]予報[よほう]によると、夜[よる]は雪[ゆき]が降[ふ]るそうですよ。気[き]をつけて帰[かえ]ってくださいね。"}},
+
+{id:"16",lv:"N3",theme:"アルバイトの面接",spk:["店長","応募者"],scene:"A short part-time job interview at a café.",
+lines:[
+["A","カフェで働[はたら]いた«ことはありますか»？","Have you ever worked in a café?"],
+["B","はい、国[くに]で一年[いちねん]«ほど»働[はたら]いていました。","Yes, I worked in one for about a year back home."],
+["A","週[しゅう]に何日[なんにち]«くらい»入[はい]れますか？","About how many days a week can you work?"],
+["B","平日[へいじつ]なら三日[みっか]、土日[どにち]も«どちらか»は大丈夫[だいじょうぶ]です。","Three weekdays, and either Saturday or Sunday is fine too."]],
+words:[
+["〜ほど ／ 〜くらい","particle","数[かず]のあとに付[つ]けて、「だいたい」。「ほど」は「くらい」より少[すこ]しかたい言[い]い方[かた]。","'about / approximately' — ほど is a touch more formal"],
+["入[はい]る（シフトに）","verb","アルバイトでは、「働[はたら]く日[ひ]を入[い]れる」という意味[いみ]。「明日[あした]入[はい]れる？」＝明日[あした]働[はたら]ける？","to take a shift (part-time job slang)"],
+["どちらか","expression","二[ふた]つの中[なか]の、一[ひと]つ。「土曜[どよう]か日曜[にちよう]か、一[ひと]つ」。","either one (of two)"]],
+gram:{p:"〜たことがある",ref:"Tae Kim — 'Past experience with ことがある'",
+ja:"「た形[けい]＋ことがある」は経験[けいけん]です。「働[はたら]いたことがある」＝人生[じんせい]で一度[いちど]でも働[はたら]いた。「〜たことがない」＝一度[いちど]もない。注意[ちゅうい]：「昨日[きのう]食[た]べたことがある」は×。特定[とくてい]の日[ひ]には使[つか]いません。",
+en:"た-form + ことがある = 'have (ever) done'. The negative is 〜たことがない. Don't use it for a specific recent day — it's about life experience.",
+ex:[["富士山[ふじさん]に登[のぼ]ったことがありますか？","Have you ever climbed Mt Fuji?"],["納豆[なっとう]は食[た]べたことがない。","I've never eaten natto."]]},
+task:{ja:"面接[めんせつ]で、自分[じぶん]の経験[けいけん]を「〜たことがあります」で二[ふた]つ話[はな]して、いつ働[はたら]けるか言[い]ってください。",en:"In an interview, describe two experiences with 〜たことがあります and say when you can work.",hint:"「〜で〜たことがあります。」×2 ＋「〜なら〜日[にち]くらい入[はい]れます。」",model:"レストランで料理[りょうり]を運[はこ]んだことがあります。それから、コンビニでレジをしたこともあります。平日[へいじつ]の夜[よる]なら、週[しゅう]に四日[よっか]くらい入[はい]れます。"}},
+
+{id:"17",lv:"N3",theme:"後悔",spk:["りく","はな"],scene:"Regretting not studying before a test.",
+lines:[
+["A","テスト、どうだった？","How was the test?"],
+["B","だめだった…。もっと«勉強[べんきょう]しておけばよかった»。","It was bad… I should've studied more."],
+["A","まあ、次[つぎ]がある«じゃない»。","Well, there's always next time, right?"],
+["B","うん。今度[こんど]は«一週間[いっしゅうかん]前[まえ]から»始[はじ]めるよ。","Yeah. Next time I'll start a week ahead."]],
+words:[
+["だめ","な-adjective","よくない、うまくいかない。会話[かいわ]では、「失敗[しっぱい]した」の意味[いみ]でもよく使[つか]う。","no good / a failure"],
+["〜じゃない（上がる調子）","ending","文[ぶん]の最後[さいご]で、声[こえ]を上[あ]げて言[い]うと、「〜でしょう？」という意味[いみ]。否定[ひてい]ではない。","'…, isn't it?' — rising intonation makes it a tag, not a negative"],
+["〜前[まえ]から","expression","「〜より早[はや]い時間[じかん]に始[はじ]めて」。「一週間[いっしゅうかん]前[まえ]から」＝七日[なのか]早[はや]く始[はじ]める。","'starting from ~ before'"]],
+gram:{p:"〜ばよかった",ref:"Tae Kim — 'Conditionals' (ば) + 'Expressing regret with ばよかった'",
+ja:"「〜ばよかった」は後悔[こうかい]です。「したほうがよかったのに、しなかった」。ば形[けい]＋よかった：勉強[べんきょう]する→勉強[べんきょう]すればよかった。しなければよかった＝したのに、しないほうがよかった。",
+en:"ば-form + よかった = 'I should have…' (but didn't). 〜なければよかった = 'I shouldn't have…'.",
+ex:[["傘[かさ]を持[も]ってくればよかった。","I should've brought an umbrella."],["あんなこと言[い]わなければよかった。","I shouldn't have said that."]]},
+task:{ja:"最近[さいきん]、後悔[こうかい]したことを「〜ばよかった」で言[い]って、次[つぎ]はどうするか話[はな]してください。",en:"Describe a recent regret with 〜ばよかった, then say what you'll do differently.",hint:"「〜ばよかった。今度[こんど]は〜。」",model:"先週[せんしゅう]、セールでほしかった靴[くつ]を買[か]わなかったんだ。買[か]っておけばよかった。今度[こんど]は迷[まよ]わないで、すぐ買[か]うよ。"}},
+
+{id:"18",lv:"N4",theme:"電話",spk:["受付","あなた"],scene:"Calling a hair salon to book an appointment.",
+lines:[
+["A","お電話[でんわ]ありがとうございます。サロン・ハナです。","Thank you for calling. This is Salon Hana."],
+["B","あの、«予約[よやく]をしたい»んですが、土曜日[どようび]の午後[ごご]は空[あ]いていますか？","Um, I'd like to make an appointment. Is Saturday afternoon free?"],
+["A","土曜[どよう]ですと、二時[にじ]«か»四時[よじ]が空[あ]いております。","For Saturday, two or four o'clock is available."],
+["B","«じゃあ»、四時[よじ]でお願[ねが]いします。カットだけです。","Then four, please. Just a cut."]],
+words:[
+["予約[よやく]","noun","レストラン、ホテル、病院[びょういん]などで、前[まえ]もって時間[じかん]を決[き]めること。","reservation / appointment"],
+["空[あ]いている","verb (state)","使[つか]っている人[ひと]がいない。時間[じかん]や席[せき]について。","to be free / available"],
+["〜か〜","particle","「AかB」＝AまたはB。二[ふた]つの選[えら]ぶものの間[あいだ]に置[お]く。","'A or B'"]],
+gram:{p:"〜たいんですが",ref:"Tae Kim — 'Desire with 〜たい' and 'The が of contrast for softening'",
+ja:"「〜たいんですが」は、お願[ねが]いの前置[まえお]きです。「が」は「でも」ではなくて、「相手[あいて]の答[こた]えを待[ま]っています」という意味[いみ]。はっきり「予約[よやく]をしたいです」と言[い]うより、ずっとやわらかいです。",
+en:"〜たいんですが opens a request politely. The trailing が isn't 'but' — it hands the turn to the other person and softens the ask.",
+ex:[["部屋[へや]を探[さが]しているんですが…。","I'm looking for a room (can you help)…"],["田中[たなか]さんと話[はな]したいんですが。","I'd like to speak with Mr Tanaka."]]},
+task:{ja:"電話[でんわ]でレストランか病院[びょういん]の予約[よやく]をしてください。日[ひ]、時間[じかん]、人数[にんずう]を言[い]ってください。",en:"Phone to book a restaurant or clinic. Give the day, time, and number of people.",hint:"「〜たいんですが、〜は空[あ]いていますか？」→「じゃあ、〜でお願[ねが]いします。〜人[にん]です。」",model:"あの、今週[こんしゅう]の金曜日[きんようび]に予約[よやく]をしたいんですが、七時[しちじ]は空[あ]いていますか？…じゃあ、七時[しちじ]半[はん]でお願[ねが]いします。三人[さんにん]です。"}},
+
+{id:"19",lv:"N3",theme:"仕事の相談",spk:["ゆき","先輩"],scene:"Asking a senior colleague whether to take a new role.",
+lines:[
+["A","実[じつ]は、大阪[おおさか]の支社[ししゃ]に«行[い]かないかって言[い]われて»いて…。","Actually, I've been asked whether I'd move to the Osaka branch…"],
+["B","へえ、いい話[はなし]じゃない。«どうするつもり»？","Oh, that sounds like a good opportunity. What are you planning to do?"],
+["A","迷[まよ]ってるんです。行[い]く«べき»だと思[おも]いますか？","I'm torn. Do you think I should go?"],
+["B","うーん。給料[きゅうりょう]«だけじゃなくて»、生活[せいかつ]も考[かんが]えたほうがいいよ。","Hmm. You should think about your life there, not just the salary."]],
+words:[
+["実[じつ]は","adverb","大事[だいじ]な話[はなし]や、秘密[ひみつ]の話[はなし]を始[はじ]めるときの言葉[ことば]。","'actually / to tell the truth'"],
+["迷[まよ]う","verb","①道[みち]が分[わ]からなくなる。②どちらにするか決[き]められない。ここは②。","to be torn / can't decide (also: to get lost)"],
+["〜だけじゃなくて","expression","「〜だけではなくて、ほかも」。「AだけじゃなくてBも」。","'not only A but also B'"]],
+gram:{p:"〜つもり ／ 〜べき",ref:"Tae Kim — 'Expressing intention with つもり' and 'Saying something should be done with べき'",
+ja:"「〜つもり」は、自分[じぶん]の予定[よてい]・計画[けいかく]です。「行[い]くつもり」＝行[い]おうと思[おも]っている。「〜べき」は、「正[ただ]しいから、そうしなければならない」という強[つよ]い意見[いけん]。「〜べきだと思[おも]う」にすると、少[すこ]しやわらかくなります。",
+en:"つもり = 'I intend to'. べき = 'should / ought to' (a firm moral or logical judgment); adding と思う softens it.",
+ex:[["来年[らいねん]、日本[にほん]に留学[りゅうがく]するつもりです。","I intend to study in Japan next year."],["約束[やくそく]は守[まも]るべきだ。","Promises should be kept."]]},
+task:{ja:"何[なに]かで迷[まよ]っています。先輩[せんぱい]に相談[そうだん]して、自分[じぶん]の「つもり」も言[い]ってください。",en:"You're torn about a decision. Ask a senior for advice and state your own intention.",hint:"「実[じつ]は、〜んです。〜べきだと思[おも]いますか？私[わたし]は〜つもりなんですが…。」",model:"実[じつ]は、来年[らいねん]、会社[かいしゃ]を辞[や]めて大学院[だいがくいん]に行[い]こうか迷[まよ]っているんです。今[いま]の仕事[しごと]を続[つづ]けるべきだと思[おも]いますか？私[わたし]は、お金[かね]をためてから行[い]くつもりなんですが…。"}},
+
+{id:"20",lv:"N4",theme:"家族の紹介",spk:["ゆかり","マルコ"],scene:"Showing a friend a family photo.",
+lines:[
+["A","これ、うちの家族[かぞく]。真[ま]ん中[なか]が«父[ちち]»で、隣[となり]が«母[はは]»。","This is my family. My dad's in the middle, and my mum's next to him."],
+["B","お父[とう]さん、背[せ]が高[たか]いね！何[なに]をしている人[ひと]？","Your dad's tall! What does he do?"],
+["A","高校[こうこう]の先生[せんせい]。もう三十年[さんじゅうねん]«くらい»教[おし]えてる。","He's a high-school teacher. He's been teaching about thirty years."],
+["B","へえ。この小[ちい]さい子[こ]は？","Oh wow. And this little one?"],
+["A","«姪[めい]»。姉[あね]の子供[こども]で、今[いま]三歳[さんさい]。","My niece. My sister's kid — she's three now."]],
+words:[
+["父[ちち] ／ お父[とう]さん","noun","自分[じぶん]の父[ちち]を、ほかの人[ひと]に話[はな]すときは「父[ちち]」。ほかの人[ひと]の父[ちち]は「お父[とう]さん」。母[はは]／お母[かあ]さんも同[おな]じ。","'my father' (humble) vs 'your father' (respectful)"],
+["姪[めい]","noun","自分[じぶん]の兄弟[きょうだい]・姉妹[しまい]の、女[おんな]の子供[こども]。男[おとこ]の子供[こども]は「甥[おい]」。","niece (nephew = 甥)"],
+["〜てる","verb form","「〜ている」の短[みじか]い形[かたち]。会話[かいわ]では「い」がよく落[お]ちます。","contraction of 〜ている (continuing state)"]],
+gram:{p:"うちの家族 ／ 内と外",ref:"Tae Kim — 'Family members: humble and honorific forms' (内 / 外)",
+ja:"日本語[にほんご]では、自分[じぶん]の家族[かぞく]（内[うち]）と、相手[あいて]の家族[かぞく]（外[そと]）で言葉[ことば]が違[ちが]います。自分[じぶん]の：父[ちち]、母[はは]、兄[あに]、姉[あね]、弟[おとうと]、妹[いもうと]。相手[あいて]の：お父[とう]さん、お母[かあ]さん、お兄[にい]さん、お姉[ねえ]さん、弟[おとうと]さん、妹[いもうと]さん。家[いえ]の中[なか]で呼[よ]ぶときは「お父[とう]さん」と言[い]います。",
+en:"Japanese uses humble words for your own family when talking to outsiders (父, 母, 兄, 姉) and respectful ones for someone else's (お父さん, お母さん…). Inside the home, you call your own dad お父さん.",
+ex:[["兄[あに]は東京[とうきょう]に住[す]んでいます。","My older brother lives in Tokyo."],["お兄[にい]さんは何[なん]をなさっていますか？","What does your older brother do?"]]},
+task:{ja:"自分[じぶん]の家族[かぞく]を一人[ひとり]か二人[ふたり]紹介[しょうかい]してください。仕事[しごと]と、一[ひと]つの特徴[とくちょう]を言[い]ってください。",en:"Introduce one or two family members: what they do and one trait.",hint:"「〜は〜で、〜をしています。〜くらい〜てる。」 Traits: 背[せ]が高[たか]い／料理[りょうり]が上手[じょうず]／よく笑[わら]う",model:"母[はは]は看護師[かんごし]で、もう二十年[にじゅうねん]くらい病院[びょういん]で働[はたら]いています。とても明[あか]るくて、よく笑[わら]う人[ひと]です。妹[いもうと]は大学生[だいがくせい]で、今[いま]は一人[ひとり]暮[ぐ]らしをしています。"}},
+{id:"21",lv:"N3",theme:"ホテルで",spk:["フロント","客"],scene:"Checking in and asking about breakfast and luggage.",
+lines:[
+["B","チェックインをお願[ねが]いします。予約[よやく]した山田[やまだ]です。","I'd like to check in. I have a reservation under Yamada."],
+["A","山田様[やまださま]ですね。«お待[ま]ちしておりました»。朝食[ちょうしょく]は七時[しちじ]から一階[いっかい]で«ご利用[りよう]いただけます»。","Mr Yamada, yes. We've been expecting you. Breakfast is available on the first floor from seven."],
+["B","ありがとうございます。チェックアウトの後[あと]、荷物[にもつ]を«預[あず]かってもらえます»か？","Thank you. After checkout, could you keep my luggage for me?"],
+["A","はい、こちらでお預[あず]かりいたします。","Yes, we'll keep it for you here."]],
+words:[
+["お待[ま]ちしておりました","expression (humble)","「待[ま]っていました」の、とてもていねいな形[かたち]。ホテルや店[みせ]で客[きゃく]に言[い]う。","'We've been expecting you' (keigo)"],
+["ご利用[りよう]いただけます","expression (humble)","「使[つか]うことができます」のていねいな言[い]い方[かた]。「〜いただけます」＝あなたは〜できます。","'is available for you to use' (keigo)"],
+["預[あず]かる ／ 預[あず]ける","verb pair","預[あず]かる＝人[ひと]の物[もの]を持[も]っていてあげる。預[あず]ける＝自分[じぶん]の物[もの]を人[ひと]に持[も]っていてもらう。","to keep (for someone) / to leave (with someone)"]],
+gram:{p:"敬語を聞き取る：お〜する ／ 〜ております",ref:"Tae Kim — 'Honorific and humble forms' (尊敬語・謙譲語)",
+ja:"ホテルの人[ひと]は謙譲語[けんじょうご]（自分[じぶん]を低[ひく]くする言葉[ことば]）を使[つか]います。「お預[あず]かりします」＝預[あず]かります。「〜ております」＝〜ています。「〜いたします」＝します。客[きゃく]は普通[ふつう]の「〜ます」で大丈夫[だいじょうぶ]。でも聞[き]いて分[わ]かることが大事[だいじ]です。",
+en:"Staff use humble keigo: お〜する (お預かりします), 〜ております (= 〜ています), いたします (= します). As the guest, plain 〜ます is fine — the goal is to recognise these forms when you hear them.",
+ex:[["ご案内[あんない]いたします。","I'll show you the way."],["ただいま確認[かくにん]しております。","We're checking on that right now."]]},
+task:{ja:"ホテルのフロントで、二[ふた]つお願[ねが]いをしてください（例[れい]：タクシー、Wi-Fi、遅[おそ]いチェックアウト）。",en:"At a hotel front desk, make two requests (e.g. a taxi, the Wi-Fi password, late checkout).",hint:"「〜てもらえますか？」「〜は何時[なんじ]までですか？」「〜を教[おし]えていただけますか？」",model:"すみません、明日[あした]の朝[あさ]八時[はちじ]にタクシーを呼[よ]んでもらえますか？それから、Wi-Fiのパスワードを教[おし]えていただけますか？"}},
+
+{id:"22",lv:"N3",theme:"約束の変更",spk:["ダニエル","えみ"],scene:"Rescheduling a meetup by text-turned-call.",
+lines:[
+["A","ごめん、明日[あした]なんだけど、急[きゅう]に仕事[しごと]が«入[はい]っちゃって»。«ずらしてもいい»かな？","Sorry, about tomorrow — some work suddenly came up. Could we shift it?"],
+["B","全然[ぜんぜん]いいよ。«いつなら»大丈夫[だいじょうぶ]？","Totally fine. When works for you?"],
+["A","木曜[もくよう]«か»金曜[きんよう]の夜[よる]、どっちかで。","Thursday or Friday evening, either one."],
+["B","じゃあ金曜[きんよう]。同[おな]じ店[みせ]で、七時[しちじ]«に»しよう。","Friday then. Same place, let's make it seven."]],
+words:[
+["仕事[しごと]が入[はい]る","expression","予定[よてい]になかった仕事[しごと]が、急[きゅう]にできること。","work comes up (unexpectedly)"],
+["ずらす","verb","時間[じかん]や場所[ばしょ]を、少[すこ]し動[うご]かすこと。「予定[よてい]をずらす」。","to shift / move (a time or position)"],
+["全然[ぜんぜん]いい","expression","本[ほん]では「全然[ぜんぜん]〜ない」だけど、会話[かいわ]では「全然[ぜんぜん]大丈夫[だいじょうぶ]」もよく言[い]う。「まったく問題[もんだい]ない」。","'totally fine' — colloquial positive 全然"]],
+gram:{p:"〜にする（決定）",ref:"Tae Kim — 'Using する with に to make a decision'",
+ja:"「AにB」＋「する」＝Bに決[き]める。「七時[しちじ]にしよう」＝七時[しちじ]に決[き]めよう。レストランでも：「私[わたし]はカレーにします」。「〜ことにする」は動詞[どうし]を決[き]めるとき：「行[い]くことにした」。",
+en:"Noun + にする = 'decide on / go with'. 七時にしよう = let's make it seven. With verbs, use 〜ことにする (行くことにした = I decided to go).",
+ex:[["飲[の]み物[もの]は何[なに]にする？","What'll you have to drink?"],["毎朝[まいあさ]走[はし]ることにした。","I've decided to run every morning."]]},
+task:{ja:"約束[やくそく]を変[か]えたいです。理由[りゆう]を短[みじか]く言[い]って、新[あたら]しい日[ひ]と時間[じかん]を「〜にしよう」で提案[ていあん]してください。",en:"Reschedule a plan: give a brief reason and propose a new day and time with 〜にしよう.",hint:"「ごめん、〜なんだけど、〜ちゃって。〜にずらしてもいい？〜にしよう。」",model:"ごめん、土曜日[どようび]なんだけど、実家[じっか]に帰[かえ]ることになっちゃって。日曜[にちよう]にずらしてもいい？お昼[ひる]の十二時[じゅうにじ]に駅前[えきまえ]で、にしよう。"}},
+
+{id:"23",lv:"N4",theme:"郵便局で",spk:["局員","客"],scene:"Sending a package overseas.",
+lines:[
+["B","これをイギリスに«送[おく]りたい»んですが。","I'd like to send this to the UK."],
+["A","中身[なかみ]は何[なん]ですか？","What's inside?"],
+["B","本[ほん]と、お菓子[かし]です。«一番[いちばん]安[やす]い»方法[ほうほう]で«お願[ねが]いします»。","Books and some sweets. The cheapest way, please."],
+["A","船便[ふなびん]ですと、二[に]か月[げつ]«ほど»かかりますが、よろしいですか？","By sea it takes about two months — is that all right?"],
+["B","はい、大丈夫[だいじょうぶ]です。","Yes, that's fine."]],
+words:[
+["中身[なかみ]","noun","箱[はこ]やカバンの中[なか]に入[はい]っているもの。","contents"],
+["船便[ふなびん]","noun","船[ふね]で送[おく]る方法[ほうほう]。安[やす]いけど遅[おそ]い。飛行機[ひこうき]は「航空便[こうくうびん]」。","surface mail (by ship) — air mail is 航空便"],
+["かかる","verb","時間[じかん]やお金[かね]が必要[ひつよう]になること。「二時間[にじかん]かかる」「千円[せんえん]かかる」。","to take (time) / cost (money)"]],
+gram:{p:"一番〜 ／ 〜ほうが〜",ref:"Tae Kim — 'Comparisons and superlatives' (一番, ほう)",
+ja:"「一番[いちばん]＋形容詞[けいようし]」は「最[もっと]も〜」。「一番[いちばん]安[やす]い」「一番[いちばん]早[はや]い」。二[ふた]つを比[くら]べるときは「AのほうがBより〜」。「飛行機[ひこうき]のほうが船[ふね]より速[はや]い。」",
+en:"一番 + adjective = 'the most ~'. To compare two things: AのほうがBより + adjective ('A is more ~ than B').",
+ex:[["この店[みせ]で一番[いちばん]人気[にんき]なのは何[なん]ですか？","What's the most popular thing here?"],["電車[でんしゃ]のほうがバスより早[はや]いですよ。","The train's faster than the bus."]]},
+task:{ja:"郵便局[ゆうびんきょく]で荷物[にもつ]を送[おく]ってください。中身[なかみ]を言[い]って、「一番[いちばん]〜」で方法[ほうほう]を選[えら]んでください。",en:"Send a package at the post office: say what's inside and pick a method using 一番.",hint:"「〜に送[おく]りたいんですが。中身[なかみ]は〜です。一番[いちばん]速[はや]い／安[やす]い方法[ほうほう]でお願[ねが]いします。」",model:"これをオーストラリアに送[おく]りたいんですが。中身[なかみ]は服[ふく]とお茶[ちゃ]です。誕生日[たんじょうび]プレゼントなので、一番[いちばん]速[はや]い方法[ほうほう]でお願[ねが]いします。"}},
+
+{id:"24",lv:"N3",theme:"体調が悪い同僚",spk:["さとし","リン"],scene:"Noticing a colleague looks unwell.",
+lines:[
+["A","リンさん、顔色[かおいろ]が«悪[わる]いけど»、大丈夫[だいじょうぶ]？","Lin, you look pale — are you OK?"],
+["B","ちょっと頭[あたま]が痛[いた]くて。昨日[きのう]«あまり寝[ね]てない»んだ。","I've got a bit of a headache. I didn't sleep much last night."],
+["A","«早退[そうたい]したほうがいい»よ。あとは僕[ぼく]がやっとくから。","You should go home early. I'll handle the rest."],
+["B","ありがとう。«お言葉[ことば]に甘[あま]えて»、そうするね。","Thanks. I'll take you up on that."]],
+words:[
+["顔色[かおいろ]が悪[わる]い","expression","顔[かお]の色[いろ]が白[しろ]くて、元気[げんき]がないように見[み]えること。","to look pale / unwell"],
+["早退[そうたい]する","verb","仕事[しごと]や学校[がっこう]を、いつもより早[はや]く帰[かえ]ること。","to leave early (work/school)"],
+["お言葉[ことば]に甘[あま]えて","expression","「あなたのやさしい言葉[ことば]を受[う]けます」。人[ひと]の親切[しんせつ]を受[う]けるときの、ていねいな言葉[ことば]。","'I'll take you up on your kind offer'"]],
+gram:{p:"〜たほうがいい ／ 〜ないほうがいい",ref:"Tae Kim — 'Giving advice with ほうがいい'",
+ja:"「た形[けい]＋ほうがいい」はアドバイスです。「早退[そうたい]したほうがいい」＝早退[そうたい]するのがいいと思[おも]う。「〜ないほうがいい」は反対[はんたい]：「無理[むり]しないほうがいい」。注意[ちゅうい]：肯定[こうてい]は「た形[けい]」、否定[ひてい]は「ない形[けい]」です。",
+en:"た-form + ほうがいい = 'you'd better / should'. Negative advice uses ない-form + ほうがいい. Note the asymmetry: past form for positive, plain negative for negative.",
+ex:[["病院[びょういん]に行[い]ったほうがいいよ。","You should go to the doctor."],["今日[きょう]はお酒[さけ]を飲[の]まないほうがいい。","You'd better not drink today."]]},
+task:{ja:"元気[げんき]がない友達[ともだち]に、「〜たほうがいい」と「〜ないほうがいい」でアドバイスして、手伝[てつだ]うと言[い]ってください。",en:"A friend looks unwell. Give advice with both forms of ほうがいい and offer to help.",hint:"「〜たほうがいいよ。〜ないほうがいい。〜は私[わたし]がやっとくから。」",model:"顔色[かおいろ]、悪[わる]いよ。今日[きょう]は早[はや]く帰[かえ]って寝[ね]たほうがいい。パソコンは見[み]ないほうがいいよ。レポートは私[わたし]が出[だ]しとくから、心配[しんぱい]しないで。"}},
+
+{id:"25",lv:"N3",theme:"昔の話",spk:["おばあさん","孫"],scene:"A grandmother remembers how the town used to be.",
+lines:[
+["B","おばあちゃん、昔[むかし]はこの辺[へん]、どんな«感[かん]じ»だった？","Grandma, what was this area like back in the day?"],
+["A","そうねえ。今[いま]みたいにビルは«なかったし»、駅[えき]も«小[ちい]さかった»のよ。","Well… there weren't buildings like now, and the station was tiny."],
+["B","へえ。«何[なに]をして遊[あそ]んでた»の？","Huh. What did you do for fun?"],
+["A","川[かわ]で泳[およ]いだり、山[やま]で虫[むし]を«取[と]ったり»してたわ。","We'd swim in the river, catch bugs in the hills, that sort of thing."]],
+words:[
+["この辺[へん]","noun","このあたり。ここの近[ちか]く。","around here"],
+["〜感[かん]じ","noun","様子[ようす]や雰囲気[ふんいき]。「どんな感[かん]じ？」＝どんな様子[ようす]？会話[かいわ]でとてもよく使[つか]う。","'feel / vibe' — どんな感じ = what's it like?"],
+["〜わ ／ 〜のよ","ending","年上[としうえ]の女性[じょせい]がよく使[つか]う、やわらかい文[ぶん]の終[お]わり方[かた]。若[わか]い人[ひと]はあまり使[つか]わない。","soft sentence endings, often older female speech"]],
+gram:{p:"〜たり〜たりする ／ 〜し",ref:"Tae Kim — 'Listing actions with たり' and 'Listing reasons with し'",
+ja:"「〜たり〜たりする」は、いくつかの中[なか]から例[れい]を出[だ]します。「泳[およ]いだり、虫[むし]を取[と]ったりした」＝ほかにもいろいろした。「〜し」は理由[りゆう]や様子[ようす]を並[なら]べます：「ビルはなかったし、駅[えき]も小[ちい]さかった（し）」。",
+en:"〜たり〜たりする lists sample activities ('things like…'). 〜し stacks reasons or descriptions, implying 'and more besides'.",
+ex:[["週末[しゅうまつ]は本[ほん]を読[よ]んだり、映画[えいが]を見[み]たりします。","On weekends I read, watch films, that kind of thing."],["この店[みせ]は安[やす]いし、おいしいし、近[ちか]い。","This place is cheap, tasty, and close."]]},
+task:{ja:"子供[こども]のころ、何[なに]をして遊[あそ]んでいましたか。「〜たり〜たり」を使[つか]って話[はな]してください。",en:"What did you do for fun as a child? Answer using 〜たり〜たり.",hint:"「子供[こども]のころは、〜たり、〜たりしていました。〜し、〜し、楽[たの]しかったです。」",model:"子供[こども]のころは、公園[こうえん]でサッカーをしたり、友達[ともだち]の家[いえ]でゲームをしたりしていました。宿題[しゅくだい]は少[すく]なかったし、毎日[まいにち]外[そと]で遊[あそ]べたし、いい時代[じだい]でした。"}},
+
+{id:"26",lv:"N4",theme:"コンビニで",spk:["店員","客"],scene:"Buying a bento and being asked the usual questions.",
+lines:[
+["A","お弁当[べんとう]、«温[あたた]めますか»？","Shall I heat up the bento?"],
+["B","はい、お願[ねが]いします。あと、«お箸[はし]»もください。","Yes, please. And chopsticks too, please."],
+["A","袋[ふくろ]はご利用[りよう]ですか？","Do you need a bag?"],
+["B","«いえ»、大丈夫[だいじょうぶ]です。«ポイントカード»はありません。","No, I'm fine. I don't have a points card."],
+["A","では、五百二十円[ごひゃくにじゅうえん]になります。","That'll be 520 yen, then."]],
+words:[
+["温[あたた]める","verb (transitive)","冷[つめ]たいものを、熱[あつ]くすること。電子[でんし]レンジで温[あたた]める。","to heat up / warm"],
+["袋[ふくろ]","noun","買[か]ったものを入[い]れる、ビニールや紙[かみ]のバッグ。今[いま]はお金[かね]がかかる店[みせ]が多[おお]い。","bag (plastic/paper)"],
+["〜になります","expression","店[みせ]で「合計[ごうけい]は〜です」という意味[いみ]。「五百円[ごひゃくえん]になります」＝五百円[ごひゃくえん]です。","'that comes to ~ (yen)'"]],
+gram:{p:"店の決まり文句を聞き取る",ref:"Tae Kim — 'Polite form and verb stems' (店員の定型表現)",
+ja:"コンビニの店員[てんいん]は、いつも同[おな]じ質問[しつもん]をします。「温[あたた]めますか？」「袋[ふくろ]はご利用[りよう]ですか？」「ポイントカードはお持[も]ちですか？」「お会計[かいけい]は〜円[えん]になります」。答[こた]えは短[みじか]くて大丈夫[だいじょうぶ]：「お願[ねが]いします」「大丈夫[だいじょうぶ]です（＝いりません）」。",
+en:"Convenience-store staff cycle through set questions. Answers are short: お願いします (yes please) or 大丈夫です (no thanks — note 大丈夫 here means 'no need').",
+ex:[["レジ袋[ぶくろ]は有料[ゆうりょう]ですが、よろしいですか？","Bags cost extra — is that OK?"],["お箸[はし]は何膳[なんぜん]お付[つ]けしますか？","How many pairs of chopsticks would you like?"]]},
+task:{ja:"コンビニで、店員[てんいん]の三[みっ]つの質問[しつもん]に答[こた]えてください。一[ひと]つは「お願[ねが]いします」、一[ひと]つは「大丈夫[だいじょうぶ]です」で。",en:"Answer three convenience-store questions: one with お願いします, one with 大丈夫です.",hint:"温[あたた]める？→ / 袋[ふくろ]？→ / ポイントカード？→ / お箸[はし]？→",model:"温[あたた]めはお願[ねが]いします。袋[ふくろ]は大丈夫[だいじょうぶ]です、自分[じぶん]のがあるので。ポイントカードは持[も]っていません。あ、お箸[はし]は一[いち]膳[ぜん]ください。"}},
+
+{id:"27",lv:"N3",theme:"苦情",spk:["管理人","住人"],scene:"Complaining politely about a noisy neighbour.",
+lines:[
+["B","あの、ちょっと«ご相談[そうだん]»が…。上[うえ]の部屋[へや]の音[おと]が、夜中[よなか]«まで»うるさくて。","Um, I'd like to ask about something… The noise from upstairs goes on until the middle of the night."],
+["A","そうですか。どんな音[おと]ですか？","I see. What kind of noise?"],
+["B","音楽[おんがく]と、足音[あしおと]です。«眠[ねむ]れない»日[ひ]が続[つづ]いていて…。","Music and footsteps. I've had a run of nights where I can't sleep…"],
+["A","分[わ]かりました。«こちらから»注意[ちゅうい]しておきます。","Understood. We'll have a word with them from our side."]],
+words:[
+["ご相談[そうだん]","noun (polite)","問題[もんだい]について、人[ひと]に話[はな]して、意見[いけん]をもらうこと。「ちょっとご相談[そうだん]が」は苦情[くじょう]をやわらかく始[はじ]める言[い]い方[かた]。","'something to discuss' — a soft opener for a complaint"],
+["夜中[よなか]","noun","夜[よる]の遅[おそ]い時間[じかん]。十二時[じゅうにじ]ごろから。","the middle of the night"],
+["注意[ちゅうい]する","verb","①気[き]をつける。②人[ひと]に「だめですよ」と言[い]う。ここは②。","to warn / have a word with (also: to be careful)"]],
+gram:{p:"可能形 ＋ ない（眠れない）／ 〜が続く",ref:"Tae Kim — 'Potential form' (可能形)",
+ja:"可能形[かのうけい]：一段[いちだん]動詞[どうし]は「る→られる」（寝[ね]る→寝[ね]られる）。五段[ごだん]動詞[どうし]は「う段[だん]→え段[だん]＋る」（眠[ねむ]る→眠[ねむ]れる、行[い]く→行[い]ける）。する→できる、来[く]る→来[こ]られる。苦情[くじょう]では、「〜できない」と困[こま]っていることを言[い]うと、伝[つた]わりやすいです。",
+en:"Potential form: る-verbs drop る and add られる; う-verbs shift the last sound to the え-row + る (眠る → 眠れる). In a complaint, stating what you 'can't do' makes the impact concrete.",
+ex:[["漢字[かんじ]が読[よ]めません。","I can't read the kanji."],["ここでは携帯[けいたい]が使[つか]えない。","You can't use a phone here."]]},
+task:{ja:"何[なに]かについて、ていねいに苦情[くじょう]を言[い]ってください。「ご相談[そうだん]が」で始[はじ]めて、困[こま]っていることを可能形[かのうけい]の否定[ひてい]で言[い]ってください。",en:"Make a polite complaint. Open with ご相談が and state the problem using a negative potential form.",hint:"「ちょっとご相談[そうだん]が…。〜が〜て、〜できない／〜れない日[ひ]が続[つづ]いていて…。」",model:"あの、ちょっとご相談[そうだん]が…。隣[となり]の工事[こうじ]の音[おと]が朝[あさ]七時[しちじ]から始[はじ]まって、週末[しゅうまつ]もゆっくり寝[ね]られなくて…。時間[じかん]を少[すこ]し遅[おそ]くしてもらえないでしょうか。"}},
+
+{id:"28",lv:"N3",theme:"おすすめを聞く",spk:["常連","バーテンダー"],scene:"Asking a bartender for a recommendation.",
+lines:[
+["A","今日[きょう]は何[なに]か«おすすめ»ある？","Anything you'd recommend today?"],
+["B","«甘[あま]いのと»«さっぱりしたの»、どっちが好[す]み？","Something sweet, or something crisp — which do you prefer?"],
+["A","さっぱりしたのがいいな。«あんまり強[つよ]くない»やつで。","Crisp, I think. Something not too strong."],
+["B","じゃあ、ゆずのサワーはどう？«飲[の]みやすい»よ。","Then how about a yuzu sour? It's easy to drink."]],
+words:[
+["さっぱりした","adjective (た-form)","味[あじ]が軽[かる]くて、口[くち]の中[なか]がきれいになる感[かん]じ。反対[はんたい]は「こってりした」。","crisp / refreshing (taste) — opposite こってり"],
+["好[この]み","noun","好[す]きなもの、好[す]きなタイプ。「好[この]みは？」＝何[なに]が好[す]き？","preference / taste"],
+["やつ","noun (casual)","「もの」「人[ひと]」の、くだけた言[い]い方[かた]。「強[つよ]くないやつ」＝強[つよ]くないもの。友達[ともだち]に使[つか]う。","'one / thing' (casual)"]],
+gram:{p:"〜の（名詞の代わり）／ 〜やすい・〜にくい",ref:"Tae Kim — 'Nominalizing with の' and 'Ease and difficulty with やすい / にくい'",
+ja:"「甘[あま]いの」の「の」は「もの」の代[か]わりです。「甘[あま]いの」＝甘[あま]い飲[の]み物[もの]。「ます形[けい]＋やすい」＝簡単[かんたん]に〜できる。「飲[の]みやすい」「読[よ]みやすい」。反対[はんたい]は「〜にくい」：「飲[の]みにくい」。",
+en:"の stands in for a noun ('the sweet one'). Verb stem + やすい = 'easy to ~'; + にくい = 'hard to ~'.",
+ex:[["赤[あか]いのと青[あお]いの、どっちがいい？","The red one or the blue one — which is better?"],["この本[ほん]は字[じ]が大[おお]きくて読[よ]みやすい。","This book has big print and is easy to read."]]},
+task:{ja:"店[みせ]の人[ひと]におすすめを聞[き]いて、自分[じぶん]の好[この]みを「〜の」と「〜やすい／にくい」で説明[せつめい]してください。",en:"Ask for a recommendation and describe your preference using 〜の and 〜やすい／にくい.",hint:"「おすすめはありますか？〜のが好[す]きです。〜やすいのがいいです。」",model:"おすすめはありますか？辛[から]いのが好[す]きなんですが、あまり辛[から]すぎると食[た]べにくいので、ほどよく辛[から]いのがいいです。"}},
+
+{id:"29",lv:"N3",theme:"迷惑をかけたとき",spk:["あなた","大家"],scene:"Apologising to the landlord for a leak you caused.",
+lines:[
+["A","すみません、洗濯機[せんたくき]のホースが«外[はず]れて»、下[した]の部屋[へや]に水[みず]が«漏[も]れてしまった»みたいで…。","I'm sorry — the washing machine hose came off, and it seems water leaked into the flat below…"],
+["B","えっ、それは大変[たいへん]。下[した]の方[かた]には«もう謝[あやま]りました»か？","Oh no, that's serious. Have you already apologised to the people downstairs?"],
+["A","はい、さっき。修理[しゅうり]の費用[ひよう]は«私[わたし]が払[はら]います»。","Yes, just now. I'll pay for the repairs."],
+["B","分[わ]かりました。保険[ほけん]が«使[つか]えるかもしれない»ので、確認[かくにん]しますね。","All right. Insurance might cover it, so I'll check."]],
+words:[
+["外[はず]れる","verb (intransitive)","ついていたものが、取[と]れること。「ボタンが外[はず]れる」。他動詞[たどうし]は「外[はず]す」。","to come off / detach"],
+["謝[あやま]る","verb","「ごめんなさい」「すみません」と言[い]うこと。","to apologise"],
+["費用[ひよう]","noun","何[なに]かのために必要[ひつよう]なお金[かね]。「修理[しゅうり]の費用[ひよう]」＝直[なお]すためのお金[かね]。","cost / expense"]],
+gram:{p:"〜てしまった（謝るとき）／ 〜かもしれない",ref:"Tae Kim — '〜てしまう for regret' and 'Uncertainty with かもしれない'",
+ja:"謝[あやま]るときは、「〜てしまいました」を使[つか]うと、「わざとじゃない、残念[ざんねん]です」という気持[きも]ちが伝[つた]わります。「壊[こわ]してしまいました」「遅[おく]れてしまいました」。「〜かもしれない」は「たぶん、でも分[わ]からない」。普通形[ふつうけい]のあとに付[つ]けます。",
+en:"When apologising, 〜てしまいました signals the outcome was unintended and regretted. 〜かもしれない ('might') follows the plain form and hedges a guess.",
+ex:[["大事[だいじ]なメールを消[け]してしまいました。","I accidentally deleted an important email."],["明日[あした]は来[こ]られないかもしれません。","I might not be able to come tomorrow."]]},
+task:{ja:"何[なに]かを壊[こわ]したり、なくしたりしました。「〜てしまいました」で謝[あやま]って、どうするか言[い]ってください。",en:"You broke or lost something. Apologise with 〜てしまいました and say how you'll make it right.",hint:"「すみません、〜てしまいました。〜は私[わたし]が〜ます。」",model:"すみません、借[か]りていた本[ほん]にコーヒーをこぼしてしまいました。本当[ほんとう]に申[もう]し訳[わけ]ありません。同[おな]じ本[ほん]を新[あたら]しく買[か]ってお返[かえ]しします。"}},
+
+{id:"30",lv:"N3",theme:"別れのあいさつ",spk:["同僚たち","転勤する人"],scene:"Farewell at a colleague's last day before a transfer.",
+lines:[
+["A","今日[きょう]で最後[さいご]なんて、«信[しん]じられない»ね。","I can't believe today's your last day."],
+["B","本当[ほんとう]に«お世話[せわ]になりました»。みんなの«おかげで»、毎日[まいにち]楽[たの]しかったです。","Thank you so much for everything. Thanks to all of you, every day was fun."],
+["A","こちらこそ。福岡[ふくおか]に行[い]っても、«連絡[れんらく]してね»。","Likewise. Keep in touch even after you go to Fukuoka."],
+["B","もちろん。«遊[あそ]びに来[き]て»ください！","Of course. Come and visit!"]],
+words:[
+["お世話[せわ]になりました","expression","「いろいろ助[たす]けてくれて、ありがとうございました」。別[わか]れるとき、仕事[しごと]の相手[あいて]によく言[い]う。","'Thank you for everything' — standard at partings"],
+["〜のおかげで","expression","いい結果[けっか]の理由[りゆう]。「みんなのおかげで」＝みんなが助[たす]けてくれたから。悪[わる]い結果[けっか]は「〜のせいで」。","'thanks to ~' (positive cause)"],
+["こちらこそ","expression","「私[わたし]のほうこそ（ありがとう）」。相手[あいて]がお礼[れい]や謝[あやま]りを言[い]ったときに返[かえ]す言葉[ことば]。","'likewise / the pleasure is mine'"]],
+gram:{p:"〜ても（逆接の条件）",ref:"Tae Kim — 'Even if… with 〜ても'",
+ja:"「て形[けい]＋も」は「〜しても、変[か]わらない」。「福岡[ふくおか]に行[い]っても連絡[れんらく]して」＝福岡[ふくおか]に行[い]く。でも、それは関係[かんけい]なく、連絡[れんらく]して。名詞[めいし]は「〜でも」：「雨[あめ]でも行[い]く」。",
+en:"て-form + も = 'even if / even though'. It says the second clause holds regardless of the first. Nouns take でも (雨でも = even if it rains).",
+ex:[["高[たか]くても、買[か]います。","Even if it's expensive, I'll buy it."],["何回[なんかい]聞[き]いても、分[わ]からない。","No matter how many times I hear it, I don't get it."]]},
+task:{ja:"会社[かいしゃ]か学校[がっこう]を離[はな]れる日[ひ]です。お礼[れい]を言[い]って、「〜ても」で約束[やくそく]を一[ひと]つしてください。",en:"It's your last day somewhere. Say thanks and make one promise using 〜ても.",hint:"「〜お世話[せわ]になりました。〜のおかげで〜。〜ても、〜ます。」",model:"一年間[いちねんかん]、本当[ほんとう]にお世話[せわ]になりました。皆[みな]さんのおかげで、日本語[にほんご]がずいぶん上手[じょうず]になりました。国[くに]に帰[かえ]っても、日本語[にほんご]の勉強[べんきょう]は続[つづ]けます。"}}
+];
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const KANJI = /([㐀-鿿々〆ヶ]+)\[([^\]]+)\]/g;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function rubyHTML(s){
+  return esc(s).replace(/«/g,"<mark>").replace(/»/g,"</mark>")
+    .replace(KANJI,"<ruby>$1<rt>$2</rt></ruby>");
+}
+function plain(s){ return String(s).replace(KANJI,"$1").replace(/[«»]/g,""); }
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem("ichinichi:"+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem("ichinichi:"+k, JSON.stringify(v)); }catch(e){} }
+};
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function permutation(n, seed){ const a=[...Array(n).keys()], r=mulberry32(seed); for(let i=n-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+/* ---------- daily pick ---------- */
+const now = new Date();
+const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+const dayN = Math.round((localMidnight - new Date(2026,0,1)) / 864e5);
+const todayKey = localMidnight.toISOString().slice(0,10);
+const N = BANK.length;
+const cycle = Math.floor(dayN / N);
+const todayIdx = permutation(N, 1130 + cycle)[((dayN % N) + N) % N];
+const TODAY = BANK[todayIdx];
+
+$("today").innerHTML = esc(new Intl.DateTimeFormat("ja-JP",{month:"long",day:"numeric",weekday:"short"}).format(now))
+  + "<small>" + esc(new Intl.DateTimeFormat("en-GB",{weekday:"short",day:"numeric",month:"short"}).format(now)) + "</small>";
+
+/* ---------- streak & seen ---------- */
+(function(){
+  const s = store.get("streak",{last:null,n:0});
+  if(s.last !== todayKey){
+    const y = new Date(localMidnight); y.setDate(y.getDate()-1);
+    s.n = (s.last === y.toISOString().slice(0,10)) ? s.n+1 : 1;
+    s.last = todayKey; store.set("streak",s);
+  }
+  $("streakN").textContent = s.n;
+  $("streak").lastChild.textContent = s.n===1 ? " day" : " days";
+})();
+function markSeen(id){ const seen = new Set(store.get("seen",[])); seen.add(id); store.set("seen",[...seen]); updateProgress(); }
+function updateProgress(){
+  const seen = new Set(store.get("seen",[])); const met = BANK.filter(b=>seen.has(b.id)).length;
+  $("seenN").textContent = met; $("totalN").textContent = N; $("progBar").style.width = (100*met/N)+"%";
+}
+
+/* ---------- render ---------- */
+let CUR = null, extra = false;
+function render(item, isExtra){
+  CUR = item; extra = !!isExtra;
+  stopSpeech();
+  $("tags").innerHTML =
+    `<span class="tag level">${esc(item.lv)}</span><span class="tag lang-jp">${esc(item.theme)}</span>` +
+    (isExtra ? `<span class="tag extra">${isExtra==="gen" ? "Fresh from Claude" : "Extra practice"}</span>` : `<span class="tag">Today's piece</span>`);
+  const names = item.spk || ["A","B"];
+  $("dlg").innerHTML = `<p class="scene">${esc(item.scene)}</p>` + item.lines.map((l,i)=>{
+    const who = l[0]==="A" ? names[0] : names[1];
+    return `<div class="line ${l[0]==="A"?"a":"b"}" data-i="${i}">
+      <button class="who lang-jp" title="Play this line" aria-label="Play line ${i+1}">${esc(who.slice(0,4))}</button>
+      <div><p class="ja">${rubyHTML(l[1])}</p><p class="en">${esc(l[2])}</p></div></div>`;
+  }).join("");
+  $("dlg").querySelectorAll(".who").forEach((b,i)=> b.addEventListener("click", ()=> speakLines([i])));
+  $("vocab").innerHTML = item.words.map(w=>`<div class="word">
+      <p class="w">${rubyHTML(w[0])}</p><span class="pos">${esc(w[1])}</span>
+      <p class="def">${rubyHTML(w[2])}</p><p class="en">${esc(w[3])}</p>
+      <button class="say" data-say="${esc(plain(w[0]).split(" ／ ")[0])}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>Hear it</button>
+    </div>`).join("");
+  $("vocab").querySelectorAll(".say").forEach(b=> b.addEventListener("click", ()=> speak(b.dataset.say)));
+  const g = item.gram;
+  $("grammar").innerHTML = `<p class="pattern">${rubyHTML(g.p)}</p>
+    <p class="jp-note">${rubyHTML(g.ja)}</p><p class="en-note">${esc(g.en)}</p>` +
+    g.ex.map(e=>`<div class="ex"><p class="ja">${rubyHTML(e[0])}</p><p class="en">${esc(e[1])}</p></div>`).join("") +
+    `<p class="src">Reference: ${esc(g.ref)}</p>`;
+  $("taskJa").innerHTML = rubyHTML(item.task.ja); $("taskEn").textContent = item.task.en;
+  $("hint").innerHTML = rubyHTML(item.task.hint); $("hint").hidden = true; $("showHint").setAttribute("aria-pressed","false");
+  $("model").innerHTML = `<span class="lbl">One way to say it</span>` + rubyHTML(item.task.model); $("model").hidden = true; $("showModel").setAttribute("aria-pressed","false");
+  $("fb").textContent = ""; $("fb").classList.remove("err");
+  $("answer").value = store.get("draft:"+item.id,"");
+  $("backToday").hidden = !isExtra;
+  document.body.classList.toggle("blur", !store.get("showEn",false));
+  markSeen(item.id);
+  window.scrollTo({top:0});
+}
+
+/* ---------- speech ---------- */
+const synth = window.speechSynthesis;
+let jaVoice = null, rate = store.get("rate",1), playing = false;
+function pickVoice(){
+  if(!synth) return;
+  const vs = synth.getVoices().filter(v=>/^ja/i.test(v.lang));
+  jaVoice = vs.find(v=>/Kyoko|O-ren|Google 日本語|Nanami|Ayumi/i.test(v.name)) || vs[0] || null;
+  $("ttsNote").hidden = !!jaVoice;
+  $("ttsNote").textContent = synth ? "No Japanese voice found on this device yet. On iPhone: Settings → Accessibility → Spoken Content → Voices → Japanese. On Android: Settings → Text-to-speech → install Japanese."
+                                    : "This browser can't speak. Open the page in Safari or Chrome for audio.";
+}
+if(synth){ pickVoice(); synth.onvoiceschanged = pickVoice; } else { $("ttsNote").hidden=false; pickVoice(); }
+function utter(text){ const u = new SpeechSynthesisUtterance(text); u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=rate; u.pitch=1; return u; }
+function speak(text){ if(!synth) return; stopSpeech(); synth.speak(utter(text)); }
+function stopSpeech(){ if(synth) synth.cancel(); playing=false; $("playLbl").textContent="Listen"; document.querySelectorAll(".line.playing").forEach(l=>l.classList.remove("playing")); }
+function speakLines(idxs){
+  if(!synth || !CUR) return; stopSpeech(); playing = true; $("playLbl").textContent="Stop";
+  const rows = [...$("dlg").querySelectorAll(".line")];
+  let k = 0;
+  const next = ()=>{
+    rows.forEach(r=>r.classList.remove("playing"));
+    if(!playing || k>=idxs.length){ stopSpeech(); return; }
+    const i = idxs[k++]; rows[i].classList.add("playing");
+    const u = utter(plain(CUR.lines[i][1]));
+    u.onend = ()=> setTimeout(next, 350); u.onerror = ()=> stopSpeech();
+    synth.speak(u);
+  };
+  next();
+}
+$("play").addEventListener("click", ()=> playing ? stopSpeech() : speakLines(CUR.lines.map((_,i)=>i)));
+function setRate(r){ rate=r; store.set("rate",r); $("rSlow").setAttribute("aria-pressed", r<1); $("rNorm").setAttribute("aria-pressed", r>=1); }
+$("rSlow").addEventListener("click", ()=> setRate(0.75)); $("rNorm").addEventListener("click", ()=> setRate(1)); setRate(rate);
+$("sayMine").addEventListener("click", ()=>{ const t=$("answer").value.trim(); if(t) speak(t); });
+
+/* ---------- toggles ---------- */
+function setFuri(on){ store.set("furi",on); document.body.classList.toggle("hide-furi",!on); $("tFuri").setAttribute("aria-pressed",on); }
+function setEn(on){ store.set("showEn",on); document.body.classList.toggle("blur",!on); $("tEn").setAttribute("aria-pressed",on); }
+$("tFuri").addEventListener("click", ()=> setFuri(document.body.classList.contains("hide-furi")));
+$("tEn").addEventListener("click", ()=> setEn(document.body.classList.contains("blur")));
+$("dlg").addEventListener("click", e=>{ const en = e.target.closest(".en"); if(en && document.body.classList.contains("blur")) setEn(true); });
+setFuri(store.get("furi",true)); setEn(store.get("showEn",false));
+$("showHint").addEventListener("click", ()=>{ const h=$("hint"); h.hidden=!h.hidden; $("showHint").setAttribute("aria-pressed",!h.hidden); });
+$("showModel").addEventListener("click", ()=>{ const m=$("model"); m.hidden=!m.hidden; $("showModel").setAttribute("aria-pressed",!m.hidden); });
+$("answer").addEventListener("input", ()=>{ if(CUR) store.set("draft:"+CUR.id, $("answer").value); });
+
+/* ---------- navigation ---------- */
+$("another").addEventListener("click", ()=>{
+  const seen = new Set(store.get("seen",[]));
+  let pool = BANK.filter(b=>b.id!==CUR.id && !seen.has(b.id));
+  if(!pool.length) pool = BANK.filter(b=>b.id!==CUR.id);
+  render(pool[Math.floor(Math.random()*pool.length)], true);
+});
+$("backToday").addEventListener("click", ()=> render(TODAY,false));
+
+/* ---------- Claude (optional) ---------- */
+(async ()=>{
+  if(!window.claude || typeof window.claude.use!=="function") return;
+  const sample = await window.claude.use("sample");
+  if(!sample) return;
+  $("feedback").hidden = false; $("gen").hidden = false;
+  let ctrl = null;
+  $("feedback").addEventListener("click", async ()=>{
+    const ans = $("answer").value.trim(); const fb = $("fb");
+    if(!ans){ fb.classList.add("err"); fb.textContent = "まず、答えを書いてください。 (Write your answer first.)"; return; }
+    if(ctrl) ctrl.abort(); ctrl = new AbortController();
+    fb.classList.remove("err"); fb.textContent = "考え中…";
+    $("feedback").disabled = true;
+    const dialogue = CUR.lines.map(l=>`${l[0]}: ${plain(l[1])}`).join("\n");
+    const prompt = `You are a warm Japanese conversation tutor for a lower-intermediate (JLPT N4–N3) learner.
+Today's dialogue:
+${dialogue}
+Grammar focus: ${plain(CUR.gram.p)} — ${CUR.gram.en}
+Task given to the learner (Japanese): ${plain(CUR.task.ja)}
+Task (English): ${CUR.task.en}
+Learner's answer:
+${ans}
+
+Give feedback in this exact shape, and nothing else:
+1. One line in simple Japanese (N4 vocabulary, no kanji above N3) praising what worked.
+2. "なおしたほうがいいところ:" followed by up to 3 bullet points. Each bullet: the corrected phrase in Japanese, then a short English reason in parentheses. If nothing needs fixing, say 「なおすところはありません！」.
+3. "もっと自然に:" followed by one natural rewrite of the whole answer in Japanese, using the grammar focus if it fits.
+Keep the total under 120 Japanese characters plus the English notes. Do not use markdown headings or bold.`;
+    try{
+      await sample(prompt, { signal: ctrl.signal, modelTier:"default", onText: ({text})=>{ fb.textContent = text; } });
+    }catch(e){
+      if(e && e.code==="cancelled") return;
+      fb.classList.add("err");
+      fb.textContent = e && e.code==="rate_limited" ? "Claude is busy right now. Try again in a minute." :
+                       e && e.code==="not_granted" ? "Feedback needs permission to ask Claude. Reload and allow it to use this." :
+                       "Couldn't get feedback: " + ((e && e.message) || "unknown error");
+      if(e && e.code==="not_granted"){ $("feedback").hidden = true; $("gen").hidden = true; }
+    }finally{ $("feedback").disabled = false; }
+  });
+  $("gen").addEventListener("click", async ()=>{
+    $("gen").disabled = true; const old = $("gen").textContent; $("gen").textContent = "Writing one…";
+    const themes = BANK.map(b=>b.theme).join("、");
+    const example = JSON.stringify(BANK[3]);
+    const prompt = `Create ONE new Japanese conversation-practice piece for a lower-intermediate (JLPT N4–N3) learner, in the exact JSON shape of this example (same keys, same array shapes, same furigana notation 漢字[かんじ] on EVERY kanji word, and «double angle quotes» around 1–2 key phrases per line):
+${example}
+
+Rules:
+- id: "gen-" + a short random string. lv: "N4" or "N3". theme: a 2–5 character Japanese theme NOT in this list: ${themes}.
+- lines: 4 to 5 turns alternating "A"/"B", natural spoken Japanese, each with an English translation.
+- words: exactly 3 entries; the third field is a monolingual explanation in very simple Japanese (N5–N4 level, with furigana), the fourth is the English gloss.
+- gram: p = the pattern; ref = "Tae Kim — " + the matching section name from Tae Kim's Guide to Japanese Grammar; ja = explanation in simple Japanese with furigana; en = English; ex = 2 example pairs.
+- task: a speaking task in simple Japanese (ja), English (en), a hint, and a model answer — all Japanese with furigana.
+- Pick a grammar point DIFFERENT from: ${BANK.map(b=>plain(b.gram.p)).join(" / ")}.
+Return only the JSON object.`;
+    try{
+      const obj = await sample.json(prompt, { modelTier:"default", cache:false });
+      const ok = obj && Array.isArray(obj.lines) && obj.lines.length>=3 && Array.isArray(obj.words) && obj.gram && obj.task && obj.task.ja;
+      if(!ok) throw new Error("The reply wasn't a complete piece. Try once more.");
+      obj.id = String(obj.id || ("gen-"+Date.now())); obj.spk = obj.spk || ["A","B"];
+      obj.words = obj.words.slice(0,3).map(w=>[w[0]||"",w[1]||"",w[2]||"",w[3]||""]);
+      obj.gram.ex = Array.isArray(obj.gram.ex) ? obj.gram.ex : []; obj.gram.ref = obj.gram.ref || "Tae Kim's Guide";
+      obj.task.hint = obj.task.hint || ""; obj.task.model = obj.task.model || ""; obj.task.en = obj.task.en || "";
+      render(obj, "gen");
+    }catch(e){
+      $("fb").classList.add("err"); $("fb").textContent = "Couldn't make a fresh piece: " + ((e && e.message) || "unknown error");
+      window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+    }finally{ $("gen").disabled = false; $("gen").textContent = old; }
+  });
+})();
+
+/* ---------- boot ---------- */
+function start(data){
+  const id = data && data.id; const item = id && BANK.find(b=>b.id===id);
+  render(item || TODAY, item && item.id!==TODAY.id);
+  if(data && data.answer) $("answer").value = data.answer;
+}
+window.claude?.hot?.snapshot?.(()=>({ id: CUR && CUR.id, answer: $("answer").value }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
