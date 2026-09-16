@@ -17,6 +17,16 @@ Live artifact: https://claude.ai/artifact/8xy11ThDPLFNKDeDdQtEb6
 
 When opened inside claude.ai with the `sample` capability granted, two extra buttons appear: **Ask Claude for feedback** on your answer, and **Ask Claude for a fresh one** to generate a brand‑new piece in the same format.
 
+## How new pieces arrive
+
+The page merges its built-in bank with documents in the artifact's shared database (collection `pieces`), so the bank grows without republishing:
+
+- A weekly Routine (Sundays 19:00 UTC) starts a fresh Claude session that writes seven new pieces for the coming week, validates them, and saves them with the ArtifactData tool.
+- The in-page "Ask Claude for a fresh one" button saves the piece it generates to the same collection.
+- Each device pins its pick for the day, so a piece that arrives mid-day never swaps out what you're reading.
+
+Piece documents use the shape in `index.html`'s `BANK`. Check one with `node tools/validate-piece.js piece.json` before saving it.
+
 ## Source layout
 
 Everything is in `index.html`: styles, markup, the content bank (`BANK`) and the logic. To add a piece, append an object to `BANK` following the existing shape. Furigana uses `漢字[かんじ]` notation and key phrases are wrapped in `«…»`.
