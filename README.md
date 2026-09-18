@@ -13,7 +13,8 @@ Live artifact: https://claude.ai/artifact/8xy11ThDPLFNKDeDdQtEb6
 - Explains three key words in simple Japanese (やさしい日本語) with an English gloss.
 - Gives one grammar insight modelled on the section structure of Tae Kim's Guide to Japanese Grammar, with two examples.
 - Sets a speaking/writing challenge with a hint and a model answer.
-- Tracks a streak and how many pieces you've met (stored in the browser only).
+- Shows five useful words a day from a 100-word vocabulary bank, each with a simple-Japanese definition, an example sentence and audio.
+- Sets a goal of five pieces a day (today's plus four via "Another one") and keeps a streak. Progress is cached in the browser and synced to the artifact's database, so it survives across devices and browser clean-ups.
 
 When opened inside claude.ai with the `sample` capability granted, two extra buttons appear: **Ask Claude for feedback** on your answer, and **Ask Claude for a fresh one** to generate a brand‑new piece in the same format.
 
@@ -21,7 +22,7 @@ When opened inside claude.ai with the `sample` capability granted, two extra but
 
 The page merges its built-in bank with documents in the artifact's shared database (collection `pieces`), so the bank grows without republishing:
 
-- A weekly Routine (Sundays 19:00 UTC) starts a fresh Claude session that writes seven new pieces for the coming week, validates them, and saves them with the ArtifactData tool.
+- A weekly Routine (Sundays 19:00 UTC) starts a fresh Claude session that writes seven new pieces and 35 new words for the coming week, validates them, and saves them to the `pieces` and `words` collections with the ArtifactData tool.
 - The in-page "Ask Claude for a fresh one" button saves the piece it generates to the same collection.
 - Each device pins its pick for the day, so a piece that arrives mid-day never swaps out what you're reading.
 

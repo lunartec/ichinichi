@@ -111,6 +111,12 @@ rt{font-size:.5em;color:var(--ink-3);font-weight:400;letter-spacing:0}
 .word .def{grid-column:1/-1;font-family:var(--jp);font-size:14.5px;line-height:1.85;margin:0;color:var(--ink)}
 .word .def::before{content:"やさしい日本語で：";color:var(--gold-ink);font-weight:700;font-size:12px;letter-spacing:.04em}
 .word .en{grid-column:1/-1;font-size:13.5px;color:var(--ink-2);margin:0}
+.word .ex{grid-column:1/-1;margin:0;padding-left:10px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:1px}
+.word .ex .ja{font-family:var(--jp);font-size:14.5px;line-height:1.8;margin:0}
+.word .ex .en{grid-column:auto;font-size:13px;color:var(--ink-3);margin:0;font-style:italic}
+.word.mini .w{font-size:18px}
+.done{color:var(--ok);font-weight:600}
+.sync{font-size:11.5px;color:var(--ink-3)}
 .word .say{grid-column:1/-1;justify-self:start;font-size:12.5px;font-weight:600;color:var(--accent);display:inline-flex;gap:5px;align-items:center;padding:2px 0}
 .word .say svg{width:13px;height:13px}
 
@@ -155,7 +161,7 @@ textarea{width:100%;min-height:96px;resize:vertical;font-family:var(--jp);font-s
     </div>
     <div class="meta">
       <div class="date" id="today"></div>
-      <span class="streak" id="streak" title="Days in a row you've opened today's piece">🔥 <b id="streakN">1</b> day</span>
+      <span class="streak" id="streak" title="Days in a row you've opened Ichinichi">🔥 <b id="streakN">1</b><span id="streakLbl"> day</span></span>
     </div>
   </header>
 
@@ -182,6 +188,12 @@ textarea{width:100%;min-height:96px;resize:vertical;font-family:var(--jp);font-s
     <summary><span class="k">言葉</span><span class="t">Key words, explained in simple Japanese</span>
       <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
     <div class="body"><div class="vocab" id="vocab"></div></div>
+  </details>
+
+  <details class="sec" open>
+    <summary><span class="k">単語</span><span class="t">Five useful words for today</span>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+    <div class="body"><div class="vocab" id="words"></div></div>
   </details>
 
   <details class="sec">
@@ -214,7 +226,7 @@ textarea{width:100%;min-height:96px;resize:vertical;font-family:var(--jp);font-s
 
   <footer class="foot">
     <div class="progress" aria-hidden="true"><i id="progBar" style="width:0"></i></div>
-    <p class="small"><b id="seenN">0</b> of <b id="totalN">0</b> pieces met · new one at midnight</p>
+    <p class="small" id="progText"><b id="seenN">0</b> of <b>5</b> today · <b id="totalN">0</b> pieces in the bank <span class="sync" id="syncNote"></span></p>
     <span class="spacer"></span>
     <button class="btn" id="another">Another one</button>
     <button class="btn" id="gen" hidden>Ask Claude for a fresh one</button>
@@ -704,59 +716,210 @@ en:"て-form + も = 'even if / even though'. It says the second clause holds re
 ex:[["高[たか]くても、買[か]います。","Even if it's expensive, I'll buy it."],["何回[なんかい]聞[き]いても、分[わ]からない。","No matter how many times I hear it, I don't get it."]]},
 task:{ja:"会社[かいしゃ]か学校[がっこう]を離[はな]れる日[ひ]です。お礼[れい]を言[い]って、「〜ても」で約束[やくそく]を一[ひと]つしてください。",en:"It's your last day somewhere. Say thanks and make one promise using 〜ても.",hint:"「〜お世話[せわ]になりました。〜のおかげで〜。〜ても、〜ます。」",model:"一年間[いちねんかん]、本当[ほんとう]にお世話[せわ]になりました。皆[みな]さんのおかげで、日本語[にほんご]がずいぶん上手[じょうず]になりました。国[くに]に帰[かえ]っても、日本語[にほんご]の勉強[べんきょう]は続[つづ]けます。"}}
 ];
+const WORDS = [
+["w001","相変[あいか]わらず","adverb","前[まえ]と同[おな]じで、変[か]わっていない。","as usual / same as ever","相変[あいか]わらず忙[いそが]しそうだね。","You look as busy as ever."],
+["w002","締[し]め切[き]り","noun","仕事[しごと]や宿題[しゅくだい]を出[だ]す、最後[さいご]の日[ひ]。","deadline","レポートの締[し]め切[き]りは金曜日[きんようび]です。","The report deadline is Friday."],
+["w003","打[う]ち合[あ]わせ","noun","仕事[しごと]の前[まえ]に、みんなで話[はな]して決[き]めること。小[ちい]さい会議[かいぎ]。","planning meeting / briefing","三時[さんじ]から打[う]ち合[あ]わせがあります。","There's a meeting from three."],
+["w004","とりあえず","adverb","「まず、今[いま]は」。あとで変[か]えるかもしれないけど、今[いま]はこれで。","for now / to start with","とりあえずビールで！","Beer to start with!"],
+["w005","なるべく","adverb","「できるだけ」。","as much as possible","なるべく早[はや]く返事[へんじ]します。","I'll reply as soon as I can."],
+["w006","都合[つごう]","noun","時間[じかん]や予定[よてい]が、いいか悪[わる]いか。「都合[つごう]がいい」＝その時間[じかん]は大丈夫[だいじょうぶ]。","convenience / availability","明日[あした]の都合[つごう]はどうですか？","How's tomorrow for you?"],
+["w007","久[ひさ]しぶり","noun / greeting","長[なが]い間[あいだ]会[あ]っていなかった。長[なが]い間[あいだ]していなかった。","long time no see / after a long time","久[ひさ]しぶりに映画[えいが]を見[み]た。","I saw a film for the first time in ages."],
+["w008","迷惑[めいわく]","noun / な-adj","ほかの人[ひと]が困[こま]ること、いやな気持[きも]ちになること。","trouble / nuisance","ご迷惑[めいわく]をおかけしてすみません。","Sorry for the trouble."],
+["w009","遠慮[えんりょ]する","verb","本当[ほんとう]はしたい・ほしいけど、相手[あいて]のことを考[かんが]えて、しないこと。","to hold back / decline politely","遠慮[えんりょ]しないで食[た]べてね。","Don't hold back, eat up."],
+["w010","わざわざ","adverb","しなくてもいいのに、そのために時間[じかん]や力[ちから]を使[つか]って。","going out of one's way","わざわざ来[き]てくれてありがとう。","Thanks for coming all this way."],
+["w011","めったに〜ない","adverb","ほとんど〜しない。とても少[すく]ない。","rarely / hardly ever","彼[かれ]はめったに怒[おこ]らない。","He hardly ever gets angry."],
+["w012","つい","adverb","そうするつもりはなかったのに、してしまう。","without meaning to / by habit","つい食[た]べすぎてしまった。","I ended up eating too much."],
+["w013","急[きゅう]に","adverb","突然[とつぜん]。前[まえ]から分[わ]かっていなかったのに、すぐに。","suddenly","急[きゅう]に雨[あめ]が降[ふ]ってきた。","It suddenly started raining."],
+["w014","確[たし]か","adverb","「たぶんそうだと思[おも]うけど、百[ひゃく]パーセントではない」。","if I remember right","確[たし]か、駅[えき]の近[ちか]くだったと思[おも]う。","I think it was near the station."],
+["w015","案外[あんがい]","adverb","思[おも]っていたのと違[ちが]って。「思[おも]ったより」。","unexpectedly / contrary to expectation","テストは案外[あんがい]簡単[かんたん]だった。","The test was easier than expected."],
+["w016","気[き]になる","expression","心配[しんぱい]で、または興味[きょうみ]があって、ずっと考[かんが]えてしまう。","to be on one's mind / to be curious about","新[あたら]しいカフェが気[き]になる。","I'm curious about the new café."],
+["w017","気[き]に入[い]る","expression","好[す]きになる。いいと思[おも]う。","to take a liking to","このカバン、気[き]に入[い]った！","I love this bag!"],
+["w018","間[ま]に合[あ]う","verb","決[き]まった時間[じかん]より前[まえ]に着[つ]く・終[お]わる。","to make it in time","終電[しゅうでん]に間[ま]に合[あ]った。","I made the last train."],
+["w019","片付[かたづ]ける","verb","物[もの]を元[もと]の場所[ばしょ]に戻[もど]して、きれいにする。仕事[しごと]を終[お]わらせる。","to tidy up / to finish off","部屋[へや]を片付[かたづ]けなきゃ。","I have to tidy my room."],
+["w020","慣[な]れる","verb","何度[なんど]もして、普通[ふつう]になる。難[むずか]しくなくなる。","to get used to","新[あたら]しい仕事[しごと]に慣[な]れましたか？","Have you got used to the new job?"],
+["w021","準備[じゅんび]","noun","何[なに]かをする前[まえ]に、必要[ひつよう]なものを用意[ようい]すること。","preparation","旅行[りょこう]の準備[じゅんび]はできた？","Are you ready for the trip?"],
+["w022","余裕[よゆう]","noun","時間[じかん]やお金[かね]、心[こころ]に、まだ空[あ]いているところがあること。","leeway / room to spare","時間[じかん]に余裕[よゆう]があるから、歩[ある]こう。","We've got time, let's walk."],
+["w023","雰囲気[ふんいき]","noun","場所[ばしょ]や人[ひと]から感[かん]じる、空気[くうき]のようなもの。","atmosphere / vibe","この店[みせ]、雰囲気[ふんいき]がいいね。","This place has a nice vibe."],
+["w024","調子[ちょうし]","noun","体[からだ]や機械[きかい]の状態[じょうたい]。「調子[ちょうし]がいい」＝元気[げんき]、うまく動[うご]く。","condition / form","最近[さいきん]、調子[ちょうし]はどう？","How are things lately?"],
+["w025","具合[ぐあい]","noun","体[からだ]や物[もの]の状態[じょうたい]。「具合[ぐあい]が悪[わる]い」＝病気[びょうき]みたい。","condition (esp. health)","具合[ぐあい]が悪[わる]いなら帰[かえ]っていいよ。","If you feel unwell, you can go home."],
+["w026","面倒[めんどう]くさい","い-adjective","するのが大変[たいへん]で、したくない気持[きも]ち。","a hassle / can't be bothered","洗濯[せんたく]、面倒[めんどう]くさいなあ。","Laundry is such a hassle."],
+["w027","もったいない","い-adjective","まだ使[つか]えるのに捨[す]てる、無駄[むだ]にするのは悪[わる]いこと。","wasteful / what a waste","捨[す]てるのはもったいないよ。","It'd be a waste to throw it away."],
+["w028","懐[なつ]かしい","い-adjective","昔[むかし]のことを思[おも]い出[だ]して、うれしいような、少[すこ]し寂[さび]しいような気持[きも]ち。","nostalgic","この歌[うた]、懐[なつ]かしい！","This song brings back memories!"],
+["w029","悔[くや]しい","い-adjective","負[ま]けたり失敗[しっぱい]したりして、いやで、もう一度[いちど]がんばりたい気持[きも]ち。","frustrating / vexing","一点[いってん]で負[ま]けて悔[くや]しい。","Losing by one point is so frustrating."],
+["w030","恥[は]ずかしい","い-adjective","人[ひと]に見[み]られて、顔[かお]が赤[あか]くなるような気持[きも]ち。","embarrassing / shy","人前[ひとまえ]で歌[うた]うのは恥[は]ずかしい。","Singing in front of people is embarrassing."],
+["w031","苦手[にがて]","な-adjective","上手[じょうず]にできない。好[す]きではない。","bad at / not fond of","朝[あさ]起[お]きるのが苦手[にがて]です。","I'm bad at getting up in the morning."],
+["w032","得意[とくい]","な-adjective","上手[じょうず]で、自信[じしん]がある。","good at (confidently)","料理[りょうり]が得意[とくい]なんです。","I'm good at cooking."],
+["w033","真面目[まじめ]","な-adjective","ふざけないで、ちゃんとする。一生懸命[いっしょうけんめい]。","serious / diligent","彼女[かのじょ]はとても真面目[まじめ]な学生[がくせい]だ。","She's a very diligent student."],
+["w034","適当[てきとう]","な-adjective","①ちょうどいい。②いいかげん、ちゃんとしない。会話[かいわ]では②が多[おお]い。","suitable / (colloquially) sloppy, whatever","適当[てきとう]に選[えら]んでいいよ。","Just pick whatever."],
+["w035","大変[たいへん]","な-adjective / adverb","①難[むずか]しくて、つらい。②とても。","tough / very","引[ひ]っ越[こ]しは大変[たいへん]だった。","Moving house was tough."],
+["w036","無理[むり]","noun / な-adjective","できない。しないほうがいい。","impossible / no way","今日[きょう]中[じゅう]に終[お]わらせるのは無理[むり]。","Finishing it today is impossible."],
+["w037","大切[たいせつ]にする","expression","大事[だいじ]だと思[おも]って、ていねいに扱[あつか]う。","to treasure / take good care of","家族[かぞく]との時間[じかん]を大切[たいせつ]にしたい。","I want to treasure time with family."],
+["w038","我慢[がまん]する","verb","つらいこと、したいことを、じっとこらえる。","to put up with / hold back","痛[いた]いのを我慢[がまん]しないで。","Don't just put up with the pain."],
+["w039","諦[あきら]める","verb","「もうできない」と思[おも]って、やめる。","to give up","最後[さいご]まで諦[あきら]めないで。","Don't give up till the end."],
+["w040","頑張[がんば]る","verb","一生懸命[いっしょうけんめい]やる。","to do one's best","明日[あした]の試験[しけん]、頑張[がんば]って！","Good luck on tomorrow's exam!"],
+["w041","確認[かくにん]する","verb","本当[ほんとう]に正[ただ]しいか、もう一度[いちど]見[み]て、確[たし]かめる。","to check / confirm","予約[よやく]を確認[かくにん]させてください。","Let me confirm the reservation."],
+["w042","報告[ほうこく]する","verb","起[お]きたことや結果[けっか]を、上[うえ]の人[ひと]に伝[つた]える。","to report","結果[けっか]は明日[あした]報告[ほうこく]します。","I'll report the results tomorrow."],
+["w043","相談[そうだん]する","verb","困[こま]ったことを人[ひと]に話[はな]して、意見[いけん]を聞[き]く。","to consult / talk over","誰[だれ]かに相談[そうだん]したほうがいいよ。","You should talk to someone about it."],
+["w044","説明[せつめい]する","verb","分[わ]かるように、話[はな]して教[おし]える。","to explain","もう一度[いちど]説明[せつめい]してもらえますか？","Could you explain it once more?"],
+["w045","伝[つた]える","verb","言葉[ことば]や気持[きも]ちを、ほかの人[ひと]に届[とど]ける。","to convey / pass on (a message)","田中[たなか]さんによろしく伝[つた]えてください。","Please say hi to Tanaka for me."],
+["w046","届[とど]く","verb (intransitive)","送[おく]ったものが、相手[あいて]のところに着[つ]く。手[て]が、そこまで行[い]く。","to arrive / reach","荷物[にもつ]は明日[あした]届[とど]きます。","The package arrives tomorrow."],
+["w047","足[た]りる","verb","必要[ひつよう]な数[かず]・量[りょう]がある。","to be enough","お金[かね]が足[た]りない。","I don't have enough money."],
+["w048","増[ふ]える ／ 減[へ]る","verb pair","増[ふ]える＝多[おお]くなる。減[へ]る＝少[すく]なくなる。","to increase / decrease","最近[さいきん]、体重[たいじゅう]が増[ふ]えた。","I've put on weight recently."],
+["w049","直[なお]す","verb","壊[こわ]れたものを、使[つか]えるようにする。間違[まちが]いを正[ただ]しくする。","to fix / correct","自転車[じてんしゃ]を直[なお]してもらった。","I got my bike fixed."],
+["w050","込[こ]む","verb","人[ひと]や車[くるま]がたくさんいて、いっぱいになる。","to be crowded","週末[しゅうまつ]の電車[でんしゃ]は込[こ]んでいる。","Weekend trains are crowded."],
+["w051","さっき","noun / adverb","少[すこ]し前[まえ]。「さっき食[た]べた」＝少[すこ]し前[まえ]に食[た]べた。","a little while ago","さっきまでここにいたよ。","He was here until just now."],
+["w052","そろそろ","adverb","「もうすぐ〜する時間[じかん]」。","it's about time to","そろそろ帰[かえ]ろうか。","Shall we head home soon?"],
+["w053","ちゃんと","adverb","正[ただ]しく、しっかり。","properly","ちゃんと寝[ね]てる？","Are you sleeping properly?"],
+["w054","結構[けっこう]","adverb / な-adj","①思[おも]ったより、かなり。②「結構[けっこう]です」＝いりません。","quite / no thank you","このラーメン、結構[けっこう]おいしいね。","This ramen is pretty good."],
+["w055","ほとんど","adverb / noun","全部[ぜんぶ]に近[ちか]い。ほぼ。","almost all / hardly (with negative)","宿題[しゅくだい]はほとんど終[お]わった。","The homework's almost done."],
+["w056","たまに","adverb","ときどき。多[おお]くない。","occasionally","たまに実家[じっか]に帰[かえ]ります。","I occasionally go back to my parents' place."],
+["w057","ずっと","adverb","①長[なが]い間[あいだ]、続[つづ]けて。②比[くら]べて、とても。","the whole time / by far","ずっと待[ま]ってたんだよ。","I've been waiting the whole time."],
+["w058","ぜんぜん","adverb","「ぜんぜん〜ない」＝まったく〜ない。会話[かいわ]では「ぜんぜん大丈夫[だいじょうぶ]」も。","not at all / totally (colloquial)","日本語[にほんご]、ぜんぜん分[わ]からなかった。","I didn't understand the Japanese at all."],
+["w059","ちょうど","adverb","ぴったり。同[おな]じ時間[じかん]、同[おな]じ数[かず]。","exactly / just","ちょうど今[いま]、出[で]かけるところだった。","I was just about to leave."],
+["w060","やっぱり","adverb","思[おも]っていたとおり。考[かんが]えたけど、やはり。","as expected / after all","やっぱり寿司[すし]にしよう。","Let's go with sushi after all."],
+["w061","せっかく","adverb","「わざわざ〜したのに」「いいチャンスなのだから」。","since one went to the trouble / a rare chance","せっかく来[き]たんだから、写真[しゃしん]を撮[と]ろう。","Since we came all this way, let's take a photo."],
+["w062","むしろ","adverb","「〜より、〜のほうが」。反対[はんたい]のことを言[い]うとき。","rather / if anything","疲[つか]れるというより、むしろ楽[たの]しい。","It's not tiring — if anything, it's fun."],
+["w063","一応[いちおう]","adverb","完全[かんぜん]ではないけど、とりあえず。念[ねん]のため。","for the time being / just in case","一応[いちおう]、傘[かさ]を持[も]っていこう。","I'll take an umbrella just in case."],
+["w064","念[ねん]のため","expression","「もしものときのために」。","just to be safe","念[ねん]のため、もう一度[いちど]確認[かくにん]します。","I'll double-check just to be safe."],
+["w065","おかげさまで","expression","「あなたのおかげで」。「元気[げんき]？」と聞[き]かれて、「はい」と答[こた]えるときにも使[つか]う。","thanks to you / thankfully","おかげさまで、元気[げんき]です。","I'm well, thank you."],
+["w066","お疲[つか]れさま","expression","仕事[しごと]のあとや、頑張[がんば]った人[ひと]に言[い]う言葉[ことば]。あいさつにもなる。","good work / thanks for your effort","お疲[つか]れさまでした！","Good work today!"],
+["w067","よろしくお願[ねが]いします","expression","これから何[なに]かをしてもらうとき、初[はじ]めて会[あ]ったときに言[い]う。","please treat me well / thanks in advance","これからよろしくお願[ねが]いします。","I look forward to working with you."],
+["w068","気[き]をつける","expression","危[あぶ]なくないように、注意[ちゅうい]する。","to be careful","車[くるま]に気[き]をつけてね。","Watch out for cars."],
+["w069","楽[たの]しみ","noun / な-adj","これから起[お]きることを、うれしく待[ま]つ気持[きも]ち。","something to look forward to","週末[しゅうまつ]の旅行[りょこう]が楽[たの]しみ。","I'm looking forward to the weekend trip."],
+["w070","仲[なか]がいい","expression","友達[ともだち]として、よく合[あ]う。よく一緒[いっしょ]にいる。","to be close / get along well","姉[あね]とは仲[なか]がいいです。","I get along well with my sister."],
+["w071","知[し]り合[あ]い","noun","会[あ]ったことがあって、名前[なまえ]を知[し]っている人[ひと]。友達[ともだち]ほど近[ちか]くない。","acquaintance","駅[えき]で知[し]り合[あ]いに会[あ]った。","I ran into an acquaintance at the station."],
+["w072","景色[けしき]","noun","山[やま]や海[うみ]など、目[め]に見[み]える広[ひろ]い場所[ばしょ]の様子[ようす]。","scenery / view","ここからの景色[けしき]は最高[さいこう]だ。","The view from here is the best."],
+["w073","割引[わりびき]","noun","値段[ねだん]を安[やす]くすること。","discount","学生[がくせい]割引[わりびき]はありますか？","Is there a student discount?"],
+["w074","お得[とく]","な-adjective","値段[ねだん]のわりに、いいものが買[か]える。","a good deal","このセットはお得[とく]ですよ。","This set's a good deal."],
+["w075","混[ま]ぜる","verb","違[ちが]うものを一緒[いっしょ]にして、かき回[まわ]す。","to mix / stir","よく混[ま]ぜてから食[た]べてください。","Mix it well before eating."],
+["w076","冷[さ]める","verb","熱[あつ]いものが、だんだん熱[あつ]くなくなる。","to cool down (food, feelings)","冷[さ]めないうちに食[た]べてね。","Eat it before it gets cold."],
+["w077","温[あたた]かい","い-adjective","ちょうどいい熱[あつ]さ。人[ひと]の心[こころ]についても言[い]う。","warm (also warm-hearted)","温[あたた]かいスープが飲[の]みたい。","I want some warm soup."],
+["w078","蒸[む]し暑[あつ]い","い-adjective","暑[あつ]くて、空気[くうき]に水[みず]が多[おお]い。日本[にほん]の夏[なつ]。","muggy / humid and hot","今日[きょう]は蒸[む]し暑[あつ]いね。","It's muggy today, isn't it."],
+["w079","梅雨[つゆ]","noun","六月[ろくがつ]ごろ、雨[あめ]が多[おお]い時期[じき]。","the rainy season","梅雨[つゆ]に入[はい]りました。","The rainy season has started."],
+["w080","乗[の]り換[か]える","verb","電車[でんしゃ]やバスを降[お]りて、別[べつ]のに乗[の]る。","to transfer (trains)","新宿[しんじゅく]で乗[の]り換[か]えてください。","Please change trains at Shinjuku."],
+["w081","通[かよ]う","verb","学校[がっこう]や会社[かいしゃ]に、毎日[まいにち]のように行[い]く。","to commute / attend regularly","週[しゅう]に二回[にかい]、ジムに通[かよ]っている。","I go to the gym twice a week."],
+["w082","寄[よ]る","verb","行[い]く途中[とちゅう]で、ちょっとほかの場所[ばしょ]に行[い]く。","to stop by","帰[かえ]りにコンビニに寄[よ]ろう。","Let's stop by the convenience store on the way home."],
+["w083","迎[むか]えに行[い]く","expression","人[ひと]が来[く]る場所[ばしょ]まで、会[あ]いに行[い]く。","to go and pick someone up","空港[くうこう]まで迎[むか]えに行[い]くよ。","I'll come pick you up at the airport."],
+["w084","出張[しゅっちょう]","noun","仕事[しごと]で、ほかの町[まち]や国[くに]に行[い]くこと。","business trip","来週[らいしゅう]、大阪[おおさか]に出張[しゅっちょう]です。","I'm on a business trip to Osaka next week."],
+["w085","残業[ざんぎょう]","noun","決[き]まった時間[じかん]のあとも、仕事[しごと]をすること。","overtime","今日[きょう]も残業[ざんぎょう]かあ。","Overtime again today, huh."],
+["w086","有給[ゆうきゅう]","noun","お金[かね]をもらいながら、休[やす]める日[ひ]。「有給[ゆうきゅう]休暇[きゅうか]」。","paid leave","金曜[きんよう]に有給[ゆうきゅう]を取[と]ります。","I'm taking paid leave on Friday."],
+["w087","締[し]める","verb","ゆるいものを、きつくする。「シートベルトを締[し]める」。","to fasten / tighten","シートベルトを締[し]めてください。","Please fasten your seatbelt."],
+["w088","注文[ちゅうもん]","noun","店[みせ]で「これをください」と言[い]うこと。","order (at a shop or restaurant)","注文[ちゅうもん]、お願[ねが]いします。","We're ready to order."],
+["w089","お会計[かいけい]","noun","レストランで、お金[かね]を払[はら]うこと。","the bill","お会計[かいけい]、別々[べつべつ]でお願[ねが]いします。","Separate bills, please."],
+["w090","おごる","verb","ほかの人[ひと]の分[ぶん]のお金[かね]も払[はら]ってあげる。","to treat (pay for someone)","今日[きょう]は僕[ぼく]がおごるよ。","It's on me today."],
+["w091","ぴったり","adverb / な-adj","ちょうどいい大[おお]きさ・時間[じかん]。よく合[あ]う。","perfect fit / exactly","この靴[くつ]、ぴったりだ。","These shoes fit perfectly."],
+["w092","ぎりぎり","adverb / noun","もう少[すこ]しで間[ま]に合[あ]わない・足[た]りない、というところ。","just barely / at the last minute","ぎりぎりで電車[でんしゃ]に間[ま]に合[あ]った。","I just barely made the train."],
+["w093","のんびり","adverb","急[いそ]がないで、ゆっくり、リラックスして。","leisurely / relaxed","週末[しゅうまつ]は家[いえ]でのんびりしたい。","I want to relax at home this weekend."],
+["w094","ぼんやり","adverb","何[なに]も考[かんが]えないで。はっきり見[み]えないで。","absent-mindedly / vaguely","ぼんやりしていて、駅[えき]を乗[の]り過[す]ごした。","I was spacing out and missed my stop."],
+["w095","びっくりする","verb","驚[おどろ]く。思[おも]っていなかったことが起[お]きて。","to be surprised","急[きゅう]に声[こえ]をかけられてびっくりした。","I was startled when someone suddenly spoke to me."],
+["w096","がっかりする","verb","期待[きたい]していたことがだめになって、悲[かな]しい。","to be disappointed","試合[しあい]が中止[ちゅうし]になって、がっかりした。","I was disappointed the match was cancelled."],
+["w097","ほっとする","verb","心配[しんぱい]がなくなって、安心[あんしん]する。","to feel relieved","無事[ぶじ]に着[つ]いてほっとした。","I was relieved to arrive safely."],
+["w098","イライラする","verb","うまくいかなくて、怒[おこ]りたい気持[きも]ちになる。","to get irritated","電車[でんしゃ]が遅[おく]れてイライラした。","The train delay got on my nerves."],
+["w099","うっかり","adverb","注意[ちゅうい]していなくて、間違[まちが]えたり忘[わす]れたりする。","carelessly / absent-mindedly","うっかり鍵[かぎ]を忘[わす]れた。","I absent-mindedly forgot my keys."],
+["w100","思[おも]い出[だ]す","verb","忘[わす]れていたことを、もう一度[いちど]頭[あたま]の中[なか]に出[だ]す。","to recall / remember","名前[なまえ]が思[おも]い出[だ]せない。","I can't recall the name."]
+];
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 const KANJI = /([㐀-鿿々〆ヶ]+)\[([^\]]+)\]/g;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function rubyHTML(s){
-  return esc(s).replace(/«/g,"<mark>").replace(/»/g,"</mark>")
-    .replace(KANJI,"<ruby>$1<rt>$2</rt></ruby>");
-}
+function rubyHTML(s){ return esc(s).replace(/«/g,"<mark>").replace(/»/g,"</mark>").replace(KANJI,"<ruby>$1<rt>$2</rt></ruby>"); }
 function plain(s){ return String(s).replace(KANJI,"$1").replace(/[«»]/g,""); }
 const store = {
   get(k,d){ try{ const v=localStorage.getItem("ichinichi:"+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
   set(k,v){ try{ localStorage.setItem("ichinichi:"+k, JSON.stringify(v)); }catch(e){} }
 };
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const SPK_ICON = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>';
 
-/* ---------- daily pick ---------- */
+/* ---------- dates ---------- */
 const now = new Date();
 const localMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 const dayN = Math.round((localMidnight - new Date(2026,0,1)) / 864e5);
-const todayKey = localMidnight.toISOString().slice(0,10);
-let ALL = BANK.slice();            // built-in pieces + anything Claude has added to the shared database
-let TODAY = null;
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const todayKey = dkey(localMidnight);
+const yKey = (()=>{ const y=new Date(localMidnight); y.setDate(y.getDate()-1); return dkey(y); })();
+$("today").innerHTML = esc(new Intl.DateTimeFormat("ja-JP",{month:"long",day:"numeric",weekday:"short"}).format(now))
+  + "<small>" + esc(new Intl.DateTimeFormat("en-GB",{weekday:"short",day:"numeric",month:"short"}).format(now)) + "</small>";
+
+/* ---------- progress state (browser cache + shared database) ---------- */
+const GOAL = 5;
+function freshState(){
+  // migrate from the first version's separate keys, if present
+  const old = store.get("streak",null);
+  return { streak: old && old.last ? {last:old.last, n:old.n||1} : {last:null,n:0}, seen: store.get("seen",[]), met:{}, words:[], updated:"" };
+}
+let STATE = store.get("state",null) || freshState();
+function advance(raw){ // bring a streak record up to today
+  if(!raw || !raw.last) return {last:todayKey, n:1};
+  if(raw.last===todayKey) return {last:raw.last, n:raw.n||1};
+  return {last:todayKey, n: raw.last===yKey ? (raw.n||0)+1 : 1};
+}
+function bestStreak(a,b){ const x=advance(a), y=advance(b); return x.n>=y.n ? x : y; }
+STATE.streak = advance(STATE.streak);
+STATE.met = STATE.met || {}; STATE.words = STATE.words || []; STATE.seen = STATE.seen || [];
+function mergeState(remote){
+  if(!remote || typeof remote!=="object") return false;
+  const before = JSON.stringify(STATE);
+  STATE.streak = bestStreak(STATE.streak, remote.streak);
+  STATE.seen = [...new Set([...(STATE.seen), ...(Array.isArray(remote.seen)?remote.seen:[])].filter(x=>typeof x==="string"))];
+  STATE.words = [...new Set([...(STATE.words), ...(Array.isArray(remote.words)?remote.words:[])].filter(x=>typeof x==="string"))];
+  const rm = remote.met && typeof remote.met==="object" ? remote.met : {};
+  for(const k of Object.keys(rm)) if(Array.isArray(rm[k])) STATE.met[k] = [...new Set([...(STATE.met[k]||[]), ...rm[k].filter(x=>typeof x==="string")])];
+  pruneMet();
+  return JSON.stringify(STATE)!==before;
+}
+function pruneMet(){ const keys=Object.keys(STATE.met).sort(); while(keys.length>21) delete STATE.met[keys.shift()]; }
+let dbSaveTimer=null, dbSaving=Promise.resolve();
+function saveState(){
+  STATE.updated = new Date().toISOString(); store.set("state",STATE);
+  if(!DBREF) return;
+  clearTimeout(dbSaveTimer);
+  dbSaveTimer = setTimeout(()=>{ const snap = JSON.parse(JSON.stringify(STATE));
+    dbSaving = dbSaving.then(()=>DBREF.doc("state/progress").set(snap)).then(()=>setSync("synced"), ()=>setSync("local only")); }, 1200);
+}
+function setSync(t){ const s=$("syncNote"); if(s) s.textContent = t==="synced" ? "progress synced" : "progress saved on this device only"; }
+function renderStreak(){ $("streakN").textContent = STATE.streak.n; $("streakLbl").textContent = STATE.streak.n===1 ? " day" : " days"; }
+function todayMet(){ return STATE.met[todayKey] || []; }
+function markSeen(id){
+  let changed=false;
+  if(!STATE.seen.includes(id)){ STATE.seen.push(id); changed=true; }
+  const m = STATE.met[todayKey] = STATE.met[todayKey] || [];
+  if(!m.includes(id)){ m.push(id); changed=true; }
+  if(changed) saveState();
+  updateProgress();
+}
+function updateProgress(){
+  const n = Math.min(todayMet().length, GOAL);
+  $("seenN").textContent = n; $("totalN").textContent = ALL.length; $("progBar").style.width = (100*n/GOAL)+"%";
+  $("progText").classList.toggle("done", n>=GOAL);
+  $("another").textContent = n>=GOAL ? "One more anyway" : "Another one";
+}
+
+/* ---------- content: built-in bank + shared database ---------- */
+let ALL = BANK.slice(), ALLW = WORDS.slice(), TODAY = null, DBREF = null;
 function findPiece(id){ return ALL.find(b=>b.id===id); }
 function chooseToday(){
   const pinned = store.get("pick:"+todayKey, null);
   if(pinned && findPiece(pinned)) return findPiece(pinned);
-  const seen = new Set(store.get("seen",[]));
+  const seen = new Set(STATE.seen);
   let pool = ALL.filter(b=>!seen.has(b.id)); if(!pool.length) pool = ALL;
   const pick = pool[Math.floor(mulberry32(1130 + dayN)() * pool.length)];
   store.set("pick:"+todayKey, pick.id);
   return pick;
 }
-TODAY = chooseToday();
-
-$("today").innerHTML = esc(new Intl.DateTimeFormat("ja-JP",{month:"long",day:"numeric",weekday:"short"}).format(now))
-  + "<small>" + esc(new Intl.DateTimeFormat("en-GB",{weekday:"short",day:"numeric",month:"short"}).format(now)) + "</small>";
-
-/* ---------- streak & seen ---------- */
-(function(){
-  const s = store.get("streak",{last:null,n:0});
-  if(s.last !== todayKey){
-    const y = new Date(localMidnight); y.setDate(y.getDate()-1);
-    s.n = (s.last === y.toISOString().slice(0,10)) ? s.n+1 : 1;
-    s.last = todayKey; store.set("streak",s);
-  }
-  $("streakN").textContent = s.n;
-  $("streak").lastChild.textContent = s.n===1 ? " day" : " days";
-})();
-function markSeen(id){ const seen = new Set(store.get("seen",[])); seen.add(id); store.set("seen",[...seen]); updateProgress(); }
-function updateProgress(){
-  const seen = new Set(store.get("seen",[])); const met = ALL.filter(b=>seen.has(b.id)).length;
-  $("seenN").textContent = met; $("totalN").textContent = ALL.length; $("progBar").style.width = (100*met/ALL.length)+"%";
+function chooseWords(){
+  const pinned = store.get("wpick:"+todayKey, null);
+  if(Array.isArray(pinned) && pinned.length===5 && pinned.every(id=>ALLW.some(w=>w[0]===id))) return pinned.map(id=>ALLW.find(w=>w[0]===id));
+  const seen = new Set(STATE.words);
+  let pool = ALLW.filter(w=>!seen.has(w[0])); if(pool.length<5) pool = ALLW.slice();
+  const r = mulberry32(7 + dayN), out=[];
+  while(out.length<5 && pool.length){ out.push(pool.splice(Math.floor(r()*pool.length),1)[0]); }
+  store.set("wpick:"+todayKey, out.map(w=>w[0]));
+  let changed=false; out.forEach(w=>{ if(!STATE.words.includes(w[0])){ STATE.words.push(w[0]); changed=true; } });
+  if(changed) saveState();
+  return out;
 }
+TODAY = chooseToday();
 
 /* ---------- render ---------- */
 let CUR = null, extra_ = false;
@@ -777,7 +940,7 @@ function render(item, isExtra){
   $("vocab").innerHTML = item.words.map(w=>`<div class="word">
       <p class="w">${rubyHTML(w[0])}</p><span class="pos">${esc(w[1])}</span>
       <p class="def">${rubyHTML(w[2])}</p><p class="en">${esc(w[3])}</p>
-      <button class="say" data-say="${esc(plain(w[0]).split(" ／ ")[0])}"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>Hear it</button>
+      <button class="say" data-say="${esc(plain(w[0]).split(" ／ ")[0])}">${SPK_ICON}Hear it</button>
     </div>`).join("");
   $("vocab").querySelectorAll(".say").forEach(b=> b.addEventListener("click", ()=> speak(b.dataset.say)));
   const g = item.gram;
@@ -795,10 +958,20 @@ function render(item, isExtra){
   markSeen(item.id);
   window.scrollTo({top:0});
 }
+function renderWords(){
+  const list = chooseWords();
+  $("words").innerHTML = list.map(w=>`<div class="word mini">
+      <p class="w">${rubyHTML(w[1])}</p><span class="pos">${esc(w[2])}</span>
+      <p class="def">${rubyHTML(w[3])}</p><p class="en">${esc(w[4])}</p>
+      <div class="ex"><p class="ja">${rubyHTML(w[5])}</p><p class="en">${esc(w[6])}</p></div>
+      <button class="say" data-say="${esc(plain(w[1]).split(" ／ ")[0])}。${esc(plain(w[5]))}">${SPK_ICON}Hear it</button>
+    </div>`).join("");
+  $("words").querySelectorAll(".say").forEach(b=> b.addEventListener("click", ()=> speak(b.dataset.say)));
+}
 
 /* ---------- speech ---------- */
 const synth = window.speechSynthesis;
-let jaVoice = null, rate = store.get("rate",1), playing = false;
+let jaVoice = null, rate = store.get("rate",1), playing = false, gen = 0, current = null, watchdog = null;
 function pickVoice(){
   if(!synth) return;
   const vs = synth.getVoices().filter(v=>/^ja/i.test(v.lang));
@@ -808,20 +981,44 @@ function pickVoice(){
                                     : "This browser can't speak. Open the page in Safari or Chrome for audio.";
 }
 if(synth){ pickVoice(); synth.onvoiceschanged = pickVoice; } else { $("ttsNote").hidden=false; pickVoice(); }
-function utter(text){ const u = new SpeechSynthesisUtterance(text); u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=rate; u.pitch=1; return u; }
-function speak(text){ if(!synth) return; stopSpeech(); synth.speak(utter(text)); }
-function stopSpeech(){ if(synth) synth.cancel(); playing=false; $("playLbl").textContent="Listen"; document.querySelectorAll(".line.playing").forEach(l=>l.classList.remove("playing")); }
+function stopSpeech(){
+  gen++; playing=false; clearTimeout(watchdog);
+  if(synth){ try{ synth.cancel(); }catch(e){} }
+  $("playLbl").textContent="Listen";
+  document.querySelectorAll(".line.playing").forEach(l=>l.classList.remove("playing"));
+}
+// Speak one string for generation `my`; calls done() when finished unless a newer request superseded it.
+function say(text, my, done){
+  if(!synth) return;
+  const go = ()=>{
+    if(my!==gen) return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang="ja-JP"; if(jaVoice) u.voice=jaVoice; u.rate=rate; u.pitch=1;
+    current = u; // keep a reference: Chrome drops callbacks on garbage-collected utterances
+    let finished=false;
+    const finish = ()=>{ if(finished || my!==gen) return; finished=true; clearTimeout(watchdog); done && done(); };
+    u.onend = finish;
+    u.onerror = e=>{ if(my!==gen) return; if(e && (e.error==="interrupted"||e.error==="canceled")) return; stopSpeech(); };
+    // iOS sometimes never fires onend: move on after a generous estimate of the line's length
+    clearTimeout(watchdog); watchdog = setTimeout(finish, 1500 + text.length*(rate<1?420:300));
+    try{ synth.resume(); }catch(e){}
+    synth.speak(u);
+  };
+  // Chrome and Safari drop an utterance queued immediately after cancel(); give the engine a beat
+  if(synth.speaking || synth.pending){ try{ synth.cancel(); }catch(e){} setTimeout(go, 150); } else go();
+}
+function speak(text){ stopSpeech(); say(text, gen, null); }
 function speakLines(idxs){
-  if(!synth || !CUR) return; stopSpeech(); playing = true; $("playLbl").textContent="Stop";
+  if(!synth || !CUR) return;
+  stopSpeech(); const my = gen; playing = true; $("playLbl").textContent="Stop";
   const rows = [...$("dlg").querySelectorAll(".line")];
   let k = 0;
   const next = ()=>{
+    if(my!==gen) return;
     rows.forEach(r=>r.classList.remove("playing"));
-    if(!playing || k>=idxs.length){ stopSpeech(); return; }
+    if(k>=idxs.length){ stopSpeech(); return; }
     const i = idxs[k++]; rows[i].classList.add("playing");
-    const u = utter(plain(CUR.lines[i][1]));
-    u.onend = ()=> setTimeout(next, 350); u.onerror = ()=> stopSpeech();
-    synth.speak(u);
+    say(plain(CUR.lines[i][1]), my, ()=> setTimeout(next, 350));
   };
   next();
 }
@@ -829,6 +1026,7 @@ $("play").addEventListener("click", ()=> playing ? stopSpeech() : speakLines(CUR
 function setRate(r){ rate=r; store.set("rate",r); $("rSlow").setAttribute("aria-pressed", r<1); $("rNorm").setAttribute("aria-pressed", r>=1); }
 $("rSlow").addEventListener("click", ()=> setRate(0.75)); $("rNorm").addEventListener("click", ()=> setRate(1)); setRate(rate);
 $("sayMine").addEventListener("click", ()=>{ const t=$("answer").value.trim(); if(t) speak(t); });
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden) stopSpeech(); });
 
 /* ---------- toggles ---------- */
 function setFuri(on){ store.set("furi",on); document.body.classList.toggle("hide-furi",!on); $("tFuri").setAttribute("aria-pressed",on); }
@@ -843,14 +1041,73 @@ $("answer").addEventListener("input", ()=>{ if(CUR) store.set("draft:"+CUR.id, $
 
 /* ---------- navigation ---------- */
 $("another").addEventListener("click", ()=>{
-  const seen = new Set(store.get("seen",[]));
+  const seen = new Set(STATE.seen);
   let pool = ALL.filter(b=>b.id!==CUR.id && !seen.has(b.id));
   if(!pool.length) pool = ALL.filter(b=>b.id!==CUR.id);
   render(pool[Math.floor(Math.random()*pool.length)], true);
 });
 $("backToday").addEventListener("click", ()=> render(TODAY,false));
 
-/* ---------- Claude (optional) ---------- */
+/* ---------- shared database: pieces and words Claude adds, plus progress ---------- */
+function normalisePiece(d){
+  if(!d || typeof d!=="object" || !Array.isArray(d.lines) || d.lines.length<2 || !d.gram || !d.task) return null;
+  const s = v => typeof v==="string" ? v : "";
+  return {
+    id: s(d.id) || "db-"+Math.random().toString(36).slice(2,8), lv: s(d.lv)||"N3", theme: s(d.theme)||"会話", scene: s(d.scene),
+    spk: Array.isArray(d.spk) && d.spk.length===2 ? d.spk.map(s) : ["A","B"],
+    lines: d.lines.filter(Array.isArray).map(l=>[l[0]==="B"?"B":"A", s(l[1]), s(l[2])]),
+    words: (Array.isArray(d.words)?d.words:[]).filter(Array.isArray).slice(0,3).map(w=>[s(w[0]),s(w[1]),s(w[2]),s(w[3])]),
+    gram: { p:s(d.gram.p), ref:s(d.gram.ref)||"Tae Kim's Guide", ja:s(d.gram.ja), en:s(d.gram.en),
+            ex:(Array.isArray(d.gram.ex)?d.gram.ex:[]).filter(Array.isArray).map(e=>[s(e[0]),s(e[1])]) },
+    task: { ja:s(d.task.ja), en:s(d.task.en), hint:s(d.task.hint), model:s(d.task.model) },
+    createdAt: s(d.createdAt)
+  };
+}
+function normaliseWord(d){
+  const s = v => typeof v==="string" ? v : "";
+  if(!d || typeof d!=="object" || !s(d.w) || !s(d.ja)) return null;
+  const ex = Array.isArray(d.ex) ? d.ex : ["",""];
+  return [s(d.id)||"dbw-"+Math.random().toString(36).slice(2,8), s(d.w), s(d.pos), s(d.ja), s(d.en), s(ex[0]), s(ex[1])];
+}
+function mergePieces(docs){
+  const extra = docs.map(normalisePiece).filter(Boolean).sort((a,b)=> a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
+  const have = new Set(BANK.map(b=>b.id));
+  ALL = BANK.concat(extra.filter(p=>{ if(have.has(p.id)) return false; have.add(p.id); return true; }));
+  const t = chooseToday();
+  if(t.id !== TODAY.id){ TODAY = t; if(!extra_ && CUR) render(TODAY,false); }
+  updateProgress();
+}
+function mergeWords(docs){
+  const extra = docs.map(normaliseWord).filter(Boolean);
+  const have = new Set(WORDS.map(w=>w[0]));
+  ALLW = WORDS.concat(extra.filter(w=>{ if(have.has(w[0])) return false; have.add(w[0]); return true; }));
+}
+async function savePiece(obj){
+  if(!DBREF) return;
+  try{ obj.createdAt = obj.createdAt || new Date().toISOString(); obj.source = "page";
+       await DBREF.collection("pieces").doc(obj.id).set(obj); }catch(e){ /* read-only viewer or quota: the piece still shows for this visit */ }
+}
+(async ()=>{
+  if(!window.claude || typeof window.claude.use!=="function") return;
+  const db = await window.claude.use("db");
+  if(!db) return;
+  DBREF = db;
+  try{
+    const [ps, ws, st] = await Promise.all([
+      db.collection("pieces").orderBy("createdAt").limit(1000).get(),
+      db.collection("words").limit(1000).get(),
+      db.doc("state/progress").get()
+    ]);
+    mergeWords(ws.docs.filter(d=>d.exists).map(d=>d.data()));
+    mergePieces(ps.docs.filter(d=>d.exists).map(d=>d.data()));
+    const remote = st.exists ? st.data() : null;
+    const changed = mergeState(remote);
+    renderStreak(); updateProgress();
+    if(changed || !remote) saveState(); else setSync("synced");
+  }catch(e){ setSync("local only"); }
+})();
+
+/* ---------- Claude feedback and generation (optional) ---------- */
 (async ()=>{
   if(!window.claude || typeof window.claude.use!=="function") return;
   const sample = await window.claude.use("sample");
@@ -921,51 +1178,12 @@ Return only the JSON object.`;
   });
 })();
 
-
-/* ---------- shared database: pieces Claude adds on a schedule ---------- */
-let DBREF = null;
-function normalisePiece(d){
-  if(!d || typeof d!=="object" || !Array.isArray(d.lines) || d.lines.length<2 || !d.gram || !d.task) return null;
-  const s = v => typeof v==="string" ? v : "";
-  return {
-    id: s(d.id) || "db-"+Math.random().toString(36).slice(2,8), lv: s(d.lv)||"N3", theme: s(d.theme)||"会話", scene: s(d.scene),
-    spk: Array.isArray(d.spk) && d.spk.length===2 ? d.spk.map(s) : ["A","B"],
-    lines: d.lines.filter(Array.isArray).map(l=>[l[0]==="B"?"B":"A", s(l[1]), s(l[2])]),
-    words: (Array.isArray(d.words)?d.words:[]).filter(Array.isArray).slice(0,3).map(w=>[s(w[0]),s(w[1]),s(w[2]),s(w[3])]),
-    gram: { p:s(d.gram.p), ref:s(d.gram.ref)||"Tae Kim's Guide", ja:s(d.gram.ja), en:s(d.gram.en),
-            ex:(Array.isArray(d.gram.ex)?d.gram.ex:[]).filter(Array.isArray).map(e=>[s(e[0]),s(e[1])]) },
-    task: { ja:s(d.task.ja), en:s(d.task.en), hint:s(d.task.hint), model:s(d.task.model) },
-    createdAt: s(d.createdAt)
-  };
-}
-function mergePieces(docs){
-  const extra = docs.map(normalisePiece).filter(Boolean).sort((a,b)=> a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id));
-  const have = new Set(BANK.map(b=>b.id));
-  ALL = BANK.concat(extra.filter(p=>{ if(have.has(p.id)) return false; have.add(p.id); return true; }));
-  const t = chooseToday();
-  if(t.id !== TODAY.id){ TODAY = t; if(!extra_ && CUR) render(TODAY,false); }
-  updateProgress();
-}
-async function savePiece(obj){
-  if(!DBREF) return;
-  try{ obj.createdAt = obj.createdAt || new Date().toISOString(); obj.source = "page";
-       await DBREF.collection("pieces").doc(obj.id).set(obj); }catch(e){ /* read-only viewer or quota: the piece still shows for this visit */ }
-}
-(async ()=>{
-  if(!window.claude || typeof window.claude.use!=="function") return;
-  const db = await window.claude.use("db");
-  if(!db) return;
-  DBREF = db;
-  try{
-    const snap = await db.collection("pieces").orderBy("createdAt").limit(1000).get();
-    mergePieces(snap.docs.filter(d=>d.exists).map(d=>d.data()));
-  }catch(e){ /* database unavailable: the built-in bank still works */ }
-})();
-
 /* ---------- boot ---------- */
 function start(data){
   const id = data && data.id; const item = id && findPiece(id);
+  renderStreak();
   render(item || TODAY, item && item.id!==TODAY.id);
+  renderWords();
   if(data && data.answer) $("answer").value = data.answer;
 }
 window.claude?.hot?.snapshot?.(()=>({ id: CUR && CUR.id, answer: $("answer").value }));
