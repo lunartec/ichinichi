@@ -73,7 +73,9 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,[tabindex]:focus
 .hide-furi rt{visibility:hidden}
 rt{font-size:.5em;color:var(--ink-3);font-weight:400;letter-spacing:0}
 .hide-en .en{display:none}
-.blur .line .en{filter:blur(6px);user-select:none;cursor:pointer}
+.line .en{cursor:pointer}
+.line.veiled .en{filter:blur(6px);user-select:none}
+.line.veiled .en::selection{background:transparent}
 
 /* controls bar */
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-top:1px solid var(--line-2)}
@@ -179,7 +181,7 @@ textarea{width:100%;min-height:96px;resize:vertical;font-family:var(--jp);font-s
       </div>
       <span class="spacer"></span>
       <button class="btn" id="tFuri" aria-pressed="true">ふりがな</button>
-      <button class="btn" id="tEn" aria-pressed="false">English</button>
+      <button class="btn" id="tEn" aria-pressed="false">Show English</button>
     </div>
     <p class="notice" id="ttsNote" hidden></p>
   </section>
@@ -932,7 +934,7 @@ function render(item, isExtra){
   const names = item.spk || ["A","B"];
   $("dlg").innerHTML = `<p class="scene">${esc(item.scene)}</p>` + item.lines.map((l,i)=>{
     const who = l[0]==="A" ? names[0] : names[1];
-    return `<div class="line ${l[0]==="A"?"a":"b"}" data-i="${i}">
+    return `<div class="line veiled ${l[0]==="A"?"a":"b"}" data-i="${i}">
       <button class="who lang-jp" title="Play this line" aria-label="Play line ${i+1}">${esc(who.slice(0,4))}</button>
       <div><p class="ja">${rubyHTML(l[1])}</p><p class="en">${esc(l[2])}</p></div></div>`;
   }).join("");
@@ -954,7 +956,7 @@ function render(item, isExtra){
   $("fb").textContent = ""; $("fb").classList.remove("err");
   $("answer").value = store.get("draft:"+item.id,"");
   $("backToday").hidden = !isExtra;
-  document.body.classList.toggle("blur", !store.get("showEn",false));
+  syncEnButton();
   markSeen(item.id);
   window.scrollTo({top:0});
 }
@@ -1030,11 +1032,18 @@ document.addEventListener("visibilitychange", ()=>{ if(document.hidden) stopSpee
 
 /* ---------- toggles ---------- */
 function setFuri(on){ store.set("furi",on); document.body.classList.toggle("hide-furi",!on); $("tFuri").setAttribute("aria-pressed",on); }
-function setEn(on){ store.set("showEn",on); document.body.classList.toggle("blur",!on); $("tEn").setAttribute("aria-pressed",on); }
 $("tFuri").addEventListener("click", ()=> setFuri(document.body.classList.contains("hide-furi")));
-$("tEn").addEventListener("click", ()=> setEn(document.body.classList.contains("blur")));
-$("dlg").addEventListener("click", e=>{ const en = e.target.closest(".en"); if(en && document.body.classList.contains("blur")) setEn(true); });
-setFuri(store.get("furi",true)); setEn(store.get("showEn",false));
+setFuri(store.get("furi",true));
+// Translations: hidden on every visit and every new piece; tap a line to reveal or re-hide it, or use the button for all.
+function lines(){ return [...$("dlg").querySelectorAll(".line")]; }
+function syncEnButton(){
+  const anyVeiled = lines().some(l=>l.classList.contains("veiled"));
+  $("tEn").textContent = anyVeiled ? "Show English" : "Hide English";
+  $("tEn").setAttribute("aria-pressed", !anyVeiled);
+}
+function setAllEn(show){ lines().forEach(l=>l.classList.toggle("veiled",!show)); syncEnButton(); }
+$("tEn").addEventListener("click", ()=> setAllEn(lines().some(l=>l.classList.contains("veiled"))));
+$("dlg").addEventListener("click", e=>{ const en = e.target.closest(".en"); if(!en) return; const line = en.closest(".line"); if(line){ line.classList.toggle("veiled"); syncEnButton(); } });
 $("showHint").addEventListener("click", ()=>{ const h=$("hint"); h.hidden=!h.hidden; $("showHint").setAttribute("aria-pressed",!h.hidden); });
 $("showModel").addEventListener("click", ()=>{ const m=$("model"); m.hidden=!m.hidden; $("showModel").setAttribute("aria-pressed",!m.hidden); });
 $("answer").addEventListener("input", ()=>{ if(CUR) store.set("draft:"+CUR.id, $("answer").value); });
